@@ -39,7 +39,7 @@ router.post("/login", async (req, res) => {
   try {
     const user = await User.findOne({ username });
     if (!user) {
-      return res.status(400).json({ msg: "Invalid credentials" });
+      return res.status(400).json({ msg: "User does not exist" });
     }
 
     const isMatch = await user.matchPassword(password);

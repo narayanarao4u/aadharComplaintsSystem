@@ -2,20 +2,16 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import api from "../api";
 import ImageModal from "./ImageModal";
-import Moment from 'react-moment';
-
+import Moment from "react-moment";
 
 const ComplaintList = () => {
   const [complaints, setComplaints] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
-  
 
   useEffect(() => {
     const fetchComplaints = async () => {
       const response = await api.get("api/complaints");
       setComplaints(response.data);
-      
-
     };
     fetchComplaints();
   }, []);
@@ -40,39 +36,46 @@ const ComplaintList = () => {
   return (
     <div>
       <h2>Complaint List</h2>
-      <ul>
+      <ol>
         {complaints.map((complaint) => (
-          <LI key={complaint._id}>
-            <Moment format="DD-MM-YYYY HH:mm">{complaint.createdAt}</Moment>
-            <strong>{complaint.stationId}</strong>
-            <div>{complaint.name}</div>
-            <div>{complaint.complaint}</div>
-            {complaint.image && (
-              <div>
-                <a
-                  href="#!"
-                  onClick={() => handleImageClick(complaint.image)}
-                  style={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
-                >
-                  View Image
-                </a>
-              </div>
-            )}
-            <div>Status: {complaint.status}</div>
-            <button onClick={() => updateStatus(complaint._id, "Resolved")}>Resolve</button>
-          </LI>
+          <li key={complaint._id}>
+            <DIV>
+              {" "}
+              <Moment format="DD-MM-YYYY HH:mm">{complaint.createdAt}</Moment>
+              <strong>{complaint.stationId}</strong>
+              <div>{complaint.name}</div>
+              <div>{complaint.complaint}</div>
+              {complaint.image && (
+                <div>
+                  <a
+                    href="#!"
+                    onClick={() => handleImageClick(complaint.image)}
+                    style={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
+                  >
+                    View Image
+                  </a>
+                </div>
+              )}
+              <div>Status: {complaint.status}</div>
+              {complaint.status === "Pending" && (
+                <button onClick={() => updateStatus(complaint._id, "Resolved")}>Resolve</button>
+              )}
+            </DIV>
+          </li>
         ))}
-      </ul>
+      </ol>
       {/* Image Modal */}
       <ImageModal image={selectedImage} onClose={handleCloseModal} />
     </div>
   );
 };
 
-const LI = styled.li`
-  list-style-type: none;
+const DIV = styled.div`
+  /* list-style-type: none; */
   display: grid;
   grid-template-columns: repeat(6, 1fr) 100px;
+  min-height: 40px;
+  border-bottom: 1px solid #ccc;
 
   padding: 2px 10px;
 `;

@@ -19,10 +19,9 @@ const ComplaintForm = ({ onNewComplaint }) => {
     data.image = image;
     console.log(data);
 
-
     try {
       const response = await api.post("api/complaints", data);
-      navigate("/complaintList"); // Redirect to the complaint list page
+      navigate("/"); // Redirect to the complaint list page
     } catch (err) {
       console.error("Error creating complaint:", err);
     }
@@ -138,14 +137,23 @@ const ComplaintForm = ({ onNewComplaint }) => {
       compressImage(file);
     }
   };
+
   return (
     <Form onSubmit={handleSubmit} onPaste={handlePaste}>
       <section>
         <label htmlFor="stationId">Station ID</label>
-        <input type="text" name="stationId" id="stationId"
-          defaultValue={data["stationId"]} placeholder="Enter station ID" />
+        <input
+          type="text"
+          name="stationId"
+          id="stationId"
+          defaultValue={data["stationId"]}
+          placeholder="Enter station ID"
+        />
 
-        <CustomInput disp="Station Name" name="name" defval={data["stattionName"]}
+        <CustomInput
+          disp="Station Name"
+          name="name"
+          defval={data["stattionName"]}
           placeholder="Enter station name"
         />
 
@@ -160,16 +168,14 @@ const ComplaintForm = ({ onNewComplaint }) => {
           required
           rows={4}
         />
-        
       </section>
 
-      <div >
-      {/* File input to upload image */}
-      <div className="file-input">
-      <label htmlFor="stationId">Upload Error Image</label>
-      <input type="file" accept="image/*" onChange={handleFileUpload} />
-      </div>
-        
+      <div>
+        {/* File input to upload image */}
+        <div className="file-input">
+          <label htmlFor="stationId">Upload Error Image</label>
+          <input type="file" accept="image/*" onChange={handleFileUpload} />
+        </div>
 
         <div style={{ border: "1px dashed gray", padding: "10px", marginBottom: "10px" }}>
           <p>Error image can be uploaded or Paste image here (Ctrl+V)</p>
@@ -187,6 +193,7 @@ const ComplaintForm = ({ onNewComplaint }) => {
 };
 
 const Form = styled.form`
+  background-image: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%);
   border: 1px solid #ccc;
   display: grid;
   grid-template-columns: minmax(320px, 1fr) 1fr;
@@ -203,9 +210,9 @@ const Form = styled.form`
   }
 
   div.file-input {
-     display: flex;
-     justify-content: space-evenly;
-     margin-bottom: 10px;
+    display: flex;
+    justify-content: space-evenly;
+    margin-bottom: 10px;
   }
 `;
 

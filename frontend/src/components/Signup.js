@@ -21,7 +21,7 @@ const Signup = () => {
 
       if (!res.ok) {
         console.log(res.status);
-        toast("Failed to sign up");
+        toast.error("Failed to sign up");
         throw new Error();
       }
       const data = await res.json();

@@ -1,65 +1,77 @@
 import { useContext, useEffect, useState } from "react";
-import logo from "./logo.svg";
+import bsnl from "./Assets/bsnl-logo.jpg";
+import aadhar from "./Assets/Aadhaar_Logo.png";
 import "./App.css";
 import styled from "styled-components";
 
 import ComplaintForm from "./components/ComplaintForm";
 import ComplaintList from "./components/ComplaintList";
+
 import Login from "./components/Login";
 import Signup from "./components/Signup";
-import AuthContext, { AuthProvider } from "./context/AuthContext";
+import AuthContext from "./context/AuthContext";
 import { toast } from "react-toastify";
-import { Link, Outlet, Route,  Routes } from "react-router-dom";
+import { Link, Outlet, Route, Routes, useNavigate } from "react-router-dom";
 import ProtectedRoute from "./context/ProtectedRoute";
+import HomePage from "./components/HomePage";
 
 function App() {
-  const [newComplaint, setNewComplaint] = useState(null);
-  const { state, dispatch } = useContext(AuthContext);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    toast("Welcome to Aadhar Complaint Management System");
-  }, []);
-
   return (
-  
-   
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route path="signup" element={<Signup />} />
-          <Route path="login" element={<Login />} />
-          <Route path="complaints" element={<ComplaintForm />} />
-          <Route path="complaintList" element={<ProtectedRoute> <ComplaintList /></ProtectedRoute>
-           } />
-        </Route>
-      </Routes>
- 
-
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        <Route index element={<HomePage />} />
+        <Route path="signup" element={<Signup />} />
+        <Route path="login" element={<Login />} />
+        <Route path="complaints" element={<ComplaintForm />} />
+        <Route
+          path="complaintList"
+          element={
+            <ProtectedRoute>
+              {" "}
+              <ComplaintList />
+            </ProtectedRoute>
+          }
+        />
+      </Route>
+    </Routes>
   );
 }
 
 function Layout() {
+  const { state, dispatch } = useContext(AuthContext);
+  const navigate = useNavigate();
 
+  const handleLogout = () => {
+    dispatch({ type: "LOGOUT" }); // Dispatch the logout action
+    localStorage.removeItem("token");
+    toast("Logged out successfully");
+    window.location.reload();
+  };
   return (
     <div className="App">
-        <div className="App-header">
-
+      <div className="App-header" onClick={() => navigate("/")}>
+        <img src={bsnl} className="bsnl-logo" alt="logo" />
         <div>Aadhar Complaint Management System</div>
-        </div>
+        <img src={aadhar} className="aadhar-logo" alt="logo" />
+      </div>
 
-        
-        <NAV>
-            <Link to="/complaints">Complaint Form</Link>
-            <Link to="/complaintList">Complaint List</Link>
-            <Link to="/login">Login</Link>
-        </NAV>
-       
+      <NAV>
+        <Link to="/complaints">New Complaint</Link>
+        <Link to="/complaintList">Complaint List</Link>
+        {state.isAuthenticated ? (
+          <Link to="/" onClick={handleLogout}>
+            Logout
+          </Link>
+        ) : (
+          <Link to="/login">Login</Link>
+        )}
+      </NAV>
+
       <main>
-        <Outlet/>
+        <Outlet />
       </main>
     </div>
-  )
-  
+  );
 }
 
 const NAV = styled.nav`
@@ -70,13 +82,20 @@ const NAV = styled.nav`
   background-color: #f8f9fa;
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
   margin-bottom: 15px;
+  margin-top: 5px;
 
   a {
     color: #007bff;
     text-decoration: none;
     margin-right: 1rem;
-  }
-  `
+    font-size: 1.2rem;
+    font-weight: bold;
+    transition: color 0.3s ease;
 
+    &:hover {
+      color: #fe9900;
+    }
+  }
+`;
 
 export default App;
