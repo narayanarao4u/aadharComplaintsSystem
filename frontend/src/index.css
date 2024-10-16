@@ -35,3 +35,18 @@ button {
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
+
+/* TEXT */
+.text-bold {
+  font-weight: bold;
+}
+
+.text-center {
+  text-align: center;
+}
+
+h2,
+h3 {
+  margin: 0;
+}
+/* TEXT */
