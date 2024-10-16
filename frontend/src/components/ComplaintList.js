@@ -4,6 +4,7 @@ import api from "../api";
 import ImageModal from "./ImageModal";
 import Moment from "react-moment";
 import ComplaintUpdate from "./ComplaintUpdate";
+import { GrEdit } from "react-icons/gr";
 
 const ComplaintList = () => {
   const [complaints, setComplaints] = useState([]);
@@ -106,7 +107,9 @@ const DisplayList = ( {complaints, selectComplaint} ) => {
               <div>Status: {complaint.status}</div>
               {complaint.status === "Pending" && (
              
-                <button onClick={() => selectComplaint(complaint)}>Update</button>
+                <button onClick={() => selectComplaint(complaint)}>
+                  <GrEdit />
+                </button>
               )}
             </DIV>
           </li>
