@@ -6,7 +6,7 @@ const complaintSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    name: {
+    stationName: {
       type: String,
       required: true,
     },

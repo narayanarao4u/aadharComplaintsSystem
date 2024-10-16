@@ -10,6 +10,7 @@ body {
   background-image: linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%);
   background-repeat: no-repeat;
   background-size: cover;
+  /* overflow: auto; */
 }
 
 code {

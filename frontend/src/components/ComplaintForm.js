@@ -1,26 +1,74 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import api from "../api";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const ComplaintForm = ({ onNewComplaint }) => {
   const [image, setImage] = useState(null);
 
   const [data, setData] = useState({});
 
+  const [stations, setStations] = useState([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchStations = async () => {
+      try {
+        const response = await api.get("/api/complaints/stationData");
+        setStations(response.data);
+      } catch (err) {
+        console.error("Error fetching stations:", err);
+      }
+    };
+
+    fetchStations();
+  },[])
+
+  useEffect(() => {
+
+    let stationID = data.stationId;
+    if (!stationID) return;
+
+        
+    if (stationID.length === 5) {
+      const station = stations.find((station) => station.StationId === +stationID);
+      console.log(station);
+
+      if (station) {
+        setData({
+          ...data,       
+          stationName: station.AEK_LOCATION,        
+        })  
+      }
+      
+    } else {
+      setData({
+        ...data,
+        stationName: "",
+      });
+    }
+
+    
+  }, [data.stationId])
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const frmData = new FormData(e.target);
     // console.log(Object.fromEntries(frmData.entries()))
 
-    const data = Object.fromEntries(frmData.entries());
-    data.image = image;
-    console.log(data);
+    const fdata = Object.fromEntries(frmData.entries());
+    fdata.image = image;
+    console.log(fdata);
 
     try {
-      const response = await api.post("api/complaints", data);
+      const response = await api.post("api/complaints", fdata);
+      if( response.status != 201) {
+        console.log(response);
+        
+        throw new Error("Failed to create complaint");
+      }
+
       navigate("/"); // Redirect to the complaint list page
     } catch (err) {
       console.error("Error creating complaint:", err);
@@ -138,35 +186,61 @@ const ComplaintForm = ({ onNewComplaint }) => {
     }
   };
 
+
+
+  const handleOnChange = (e) => {
+    setData({ ...data, [e.target.name]: e.target.value });
+  }
+
   return (
-    <Form onSubmit={handleSubmit} onPaste={handlePaste}>
+    <>
+      <Form onSubmit={handleSubmit} onPaste={handlePaste}>
       <section>
         <label htmlFor="stationId">Station ID</label>
         <input
           type="text"
           name="stationId"
           id="stationId"
-          defaultValue={data["stationId"]}
-          placeholder="Enter station ID"
+          value={data["stationId"]}
+          placeholder="Enter station ID" 
+          maxlength={5}    minLength={5} 
+          required   
+          
+          onChange={handleOnChange}
         />
+
+
 
         <CustomInput
           disp="Station Name"
-          name="name"
-          defval={data["stattionName"]}
+          name="stationName"
+          value={data["stationName"]}
           placeholder="Enter station name"
+          handleOnChange={handleOnChange}
+          readOnly={true}
         />
 
-        <CustomInput disp="Operator Name" name="name" defval={data["name"]} />
+        <CustomInput disp="Operator Name" name="Operatorname" value={data["Operatorname"]} 
+            handleOnChange={handleOnChange}
+            placeholder="Enter operator name"
+            />
 
-        <CustomInput disp="Phone Number" name="phone" defval={data["phone"]} />
+        <CustomInput disp="Phone Number" name="phone" value={data["phone"]} 
+          handleOnChange={handleOnChange}
+          maxlength={"10"} minlength={"10"} 
+          placeholder="Enter operator Phone Number"
+        />
+
         <label htmlFor="complaint">Complaint Discription</label>
         <textarea
           name="complaint"
           id="complaint"
-          defaultValue={data["complaint"]}
+          value={data["complaint"]}
           required
           rows={4}
+          onChange={handleOnChange}
+          
+
         />
       </section>
 
@@ -186,15 +260,24 @@ const ComplaintForm = ({ onNewComplaint }) => {
       </div>
 
       <div>
-        <button type="submit">Submit</button>
+        <button type="submit" disabled={!data?.stationName}>Submit</button>
       </div>
     </Form>
+     
+     <hr/>
+ 
+
+    </>
+    
   );
 };
 
 const Form = styled.form`
   background-image: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%);
-  border: 1px solid #ccc;
+  border: 3px solid #ccc;
+  border-radius: 10px;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1);
+
   display: grid;
   grid-template-columns: minmax(320px, 1fr) 1fr;
   gap: 10px;
@@ -216,11 +299,11 @@ const Form = styled.form`
   }
 `;
 
-export function CustomInput({ disp, name, type = "text", defval = null }) {
+export function CustomInput({ disp, name,  type = "text", value, handleOnChange, ...rest }) {
   return (
     <>
       <label htmlFor={name}>{disp} :</label>
-      <input type={type} name={name} id={name} defaultValue={defval} required />
+      <input type={type} name={name} id={name} value={value} required {...rest} onChange={handleOnChange}/>
     </>
   );
 }

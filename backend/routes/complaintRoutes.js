@@ -1,14 +1,16 @@
 const express = require('express');
-const { getComplaints, createComplaint, updateComplaint, getSummary } = require('../controllers/complaintController');
+const r = require('../controllers/complaintController');
 
 const router = express.Router();
 
 // Routes for complaints
-router.get('/', getComplaints);
-router.post('/', createComplaint);
-router.put('/:id', updateComplaint);
+router.get('/', r.getComplaints);
+router.get('/stationData', r.getStationData);
+router.get('/getSummary', r.getSummary);
+router.get('/:id', r.getComplaints);
+router.post('/', r.createComplaint);
+router.put('/:id', r.updateComplaint);
 
-router.get('/getSummary', getSummary);
 
 
 module.exports = router;

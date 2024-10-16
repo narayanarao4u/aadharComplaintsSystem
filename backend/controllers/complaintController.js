@@ -1,14 +1,45 @@
 const Complaint = require("../models/complaintModel");
+const Station = require("../models/stationmodel");
 
 // Get all complaints
 const getComplaints = async (req, res) => {
   try {
-    const complaints = await Complaint.find();
+    let  complaints ;
+
+    if(req.params.id) {
+       const query = {_id :req.params.id};
+       complaints = await Complaint.findOne(query);
+    } else {
+       complaints = await Complaint.find();
+    };
+    
+    
     res.status(200).json(complaints);
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
+// Get Station Data
+const getStationData = async (req, res) => {
+  try {
+    let  complaints ;
+
+    if(req.params.id) {
+       const query = {_id :req.params.id};
+       complaints = await Station.findOne(query);
+    } else {
+       complaints = await Station.find();
+    };
+    
+    
+    res.status(200).json(complaints);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 
 // Create a new complaint
 const createComplaint = async (req, res) => {
@@ -16,11 +47,26 @@ const createComplaint = async (req, res) => {
   const data = req.body;
   // console.log(data);
   try {
+
+    const maxID = await Complaint.aggregate([
+      { $group: { _id: null, maxID: { $max: "$complaintID" } } }
+    ])
+
+    const complaintID = maxID.length > 0 ? maxID[0].maxID + 1 : 1;
+
+    // console.log(complaintID);
+
+    data.complaintID = complaintID;
+
     const newComplaint = new Complaint(data);
+    
     await newComplaint.save();
     res.status(201).json(newComplaint);
+
     
   } catch (err) {
+    console.log(err);
+    
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -46,6 +92,9 @@ const updateComplaint = async (req, res) => {
 
 const getSummary = async (req, res) => {
   try {
+    
+    
+    
     const complaints = await Complaint.aggregate( 
       [
         {
@@ -56,10 +105,12 @@ const getSummary = async (req, res) => {
         }
       ]
     );
+
     res.status(200).json(complaints);
+
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
 }
 
-module.exports = { getComplaints, createComplaint, updateComplaint, getSummary };
+module.exports = { getComplaints, createComplaint, updateComplaint, getSummary, getStationData };

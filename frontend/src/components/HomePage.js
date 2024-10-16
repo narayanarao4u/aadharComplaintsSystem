@@ -6,7 +6,7 @@ import GetSummary from "./GetSummary";
 function HomePage() {
   useEffect(() => {
     window.scrollTo(0, 0);
-    toast("Welcome to Aadhar Complaint Management System");
+    // toast("Welcome  Complaint Management System");
   }, []);
 
   return (

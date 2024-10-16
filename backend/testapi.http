@@ -1,0 +1,10 @@
+@Url = http://localhost:5000
+
+GET {{Url}}/api/complaints/
+
+###
+GET {{Url}}/api/complaints/6708ca469da834eba9a19583
+
+
+###
+GET {{Url}}/api/complaints/stationData

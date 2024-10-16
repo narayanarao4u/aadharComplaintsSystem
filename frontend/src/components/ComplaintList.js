@@ -3,10 +3,12 @@ import styled from "styled-components";
 import api from "../api";
 import ImageModal from "./ImageModal";
 import Moment from "react-moment";
+import ComplaintUpdate from "./ComplaintUpdate";
 
 const ComplaintList = () => {
   const [complaints, setComplaints] = useState([]);
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedComplaint, setSelectedComplaint] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const fetchComplaints = async () => {
@@ -16,15 +18,45 @@ const ComplaintList = () => {
     fetchComplaints();
   }, []);
 
-  const updateStatus = async (id, status) => {
+  const updateComplaint = async (id, status) => {
+
+
+    setSelectedComplaint(null);
+    /*
     try {
       await api.put(`api/complaints/${id}`, { status });
       setComplaints(complaints.map((c) => (c._id === id ? { ...c, status } : c)));
     } catch (err) {
       console.error("Error updating status:", err);
     }
+      */
   };
 
+  const selectComplaint = (complaint) => {
+    setSelectedComplaint(complaint);
+    setShowModal(true);   
+  }
+
+ 
+  return (
+    <div>
+        {selectedComplaint 
+         ? <ComplaintUpdate complaint={selectedComplaint}  updateComplaint={updateComplaint} /> 
+         : <DisplayList complaints={complaints}  
+           selectComplaint = {selectComplaint}  />
+        }
+        
+        
+      
+     
+    </div>
+  );
+};
+
+
+//Display List Component
+const DisplayList = ( {complaints, selectComplaint} ) => {
+  const [selectedImage, setSelectedImage] = useState(null);
   const handleImageClick = (image) => {
     setSelectedImage(image);
   };
@@ -34,18 +66,33 @@ const ComplaintList = () => {
   };
 
   return (
-    <div>
+    <>
       <h2>Complaint List</h2>
-      <ol>
+      <ol start={0}>
+        <li>
+          <DIV>
+          
+          <strong>Date/Time</strong>
+          <strong>ComplaintID </strong>
+          <strong>Station</strong>
+          <strong>Complaint</strong>
+          <strong>Images</strong>
+          <strong>Status</strong>
+          <strong>Status</strong>
+
+          </DIV>
+          
+        </li>
         {complaints.map((complaint) => (
+          
           <li key={complaint._id}>
             <DIV>
               {" "}
               <Moment format="DD-MM-YYYY HH:mm">{complaint.createdAt}</Moment>
-              <strong>{complaint.stationId}</strong>
-              <div>{complaint.name}</div>
+              <strong>{complaint.complaintID}</strong>
+              <div>{complaint.stationId}/{complaint.stationName}</div>
               <div>{complaint.complaint}</div>
-              {complaint.image && (
+              {complaint.image ? (
                 <div>
                   <a
                     href="#!"
@@ -55,22 +102,26 @@ const ComplaintList = () => {
                     View Image
                   </a>
                 </div>
-              )}
+              ) : <span>Image not Uploaded </span>}
               <div>Status: {complaint.status}</div>
               {complaint.status === "Pending" && (
-                <button onClick={() => updateStatus(complaint._id, "Resolved")}>Resolve</button>
+             
+                <button onClick={() => selectComplaint(complaint)}>Update</button>
               )}
             </DIV>
           </li>
         ))}
       </ol>
-      {/* Image Modal */}
-      <ImageModal image={selectedImage} onClose={handleCloseModal} />
-    </div>
-  );
-};
+       {/* Image Modal */}
+       <ImageModal image={selectedImage} onClose={handleCloseModal} />
+    
+    </>
+  )
+
+}
 
 const DIV = styled.div`
+text-align: left;
   /* list-style-type: none; */
   display: grid;
   grid-template-columns: repeat(6, 1fr) 100px;
