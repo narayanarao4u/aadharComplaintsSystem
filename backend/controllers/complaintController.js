@@ -10,7 +10,7 @@ exports.getComplaints = async (req, res) => {
       const query = { _id: req.params.id };
       complaints = await Complaint.findOne(query);
     } else {
-      complaints = await Complaint.find();
+      complaints = await Complaint.find({}).sort({ complaintID: -1 }) ;
     }
 
     res.status(200).json(complaints);
@@ -66,6 +66,8 @@ exports.createComplaint = async (req, res) => {
 
 // Update complaint status
 exports.updateComplaintStatus = async (req, res) => {
+  console.log('Updating complaint status');
+  
   const { id } = req.params;
   const { status } = req.body;
 
@@ -84,6 +86,8 @@ exports.updateComplaintStatus = async (req, res) => {
 };
 
 exports.updateComplaint = async (req, res) => {
+  console.log("Updating complaint");
+  
   const { id } = req.params;
   const data = req.body;
 

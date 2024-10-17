@@ -4,12 +4,14 @@ import api from "../api";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
+
 const ComplaintForm = ({ onNewComplaint }) => {
   const [image, setImage] = useState(null);
 
   const [data, setData] = useState({});
 
   const [stations, setStations] = useState([]);
+  const [complaintHistory, setComplaintHistory] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,7 +31,6 @@ const ComplaintForm = ({ onNewComplaint }) => {
 
     let stationID = data.stationId;
     if (!stationID) return;
-
         
     if (stationID.length === 5) {
       const station = stations.find((station) => station.StationId === +stationID);
@@ -40,6 +41,8 @@ const ComplaintForm = ({ onNewComplaint }) => {
           ...data,       
           stationName: station.AEK_LOCATION,        
         })  
+
+        getComplaintsbyStionID(stationID);
       }
       
     } else {
@@ -51,6 +54,63 @@ const ComplaintForm = ({ onNewComplaint }) => {
 
     
   }, [data.stationId])
+
+  const getComplaintsbyStionID = async (stationID) => {
+    try {
+      const response = await api.get(`/api/complaints/?stationID=${stationID}`);
+      
+      setComplaintHistory(response.data);
+
+    } catch (err) {
+      console.error("Error fetching complaints:", err);
+    }
+  }
+
+  
+// Function to compress the image
+ const compressImage = (imageFile) => {
+  // Set the max width/height for the image
+  const MAX_WIDTH = 1024;
+  const MAX_HEIGHT = 800;
+  const reader = new FileReader();
+
+  reader.onload = function (e) {
+    const img = new Image();
+    img.src = e.target.result;
+
+    img.onload = function () {
+      const canvas = document.createElement("canvas");
+      let width = img.width;
+      let height = img.height;
+
+      // Calculate new dimensions based on max width/height
+      if (width > MAX_WIDTH || height > MAX_HEIGHT) {
+        if (width > height) {
+          height = Math.round((height *= MAX_WIDTH / width));
+          width = MAX_WIDTH;
+        } else {
+          width = Math.round((width *= MAX_HEIGHT / height));
+          height = MAX_HEIGHT;
+        }
+      }
+
+      // Set canvas dimensions to the new dimensions
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Compress and convert the image to base64
+      const compressedImage = canvas.toDataURL("image/jpeg", 0.7); // Adjust quality (0.7)
+      setImage(compressedImage); // Set the compressed image
+      
+    };
+  };
+
+  reader.readAsDataURL(imageFile);
+};
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -76,9 +136,7 @@ const ComplaintForm = ({ onNewComplaint }) => {
     }
   };
 
-  // Set the max width/height for the image
-  const MAX_WIDTH = 1024;
-  const MAX_HEIGHT = 800;
+
 
   // Handle paste event to capture and compress the image
   const handlePaste = (event) => {
@@ -88,59 +146,22 @@ const ComplaintForm = ({ onNewComplaint }) => {
     for (let i = 0; i < items.length; i++) {
       if (items[i].type.indexOf("image") !== -1) {
         const blob = items[i].getAsFile();
+        
         compressImage(blob); // Compress the pasted image
         // cropImage(blob); // Crop the pasted image
+
+    
       }
     }
   };
 
 
 
-  // Function to compress the image
-  const compressImage = (imageFile) => {
-    const reader = new FileReader();
-
-    reader.onload = function (e) {
-      const img = new Image();
-      img.src = e.target.result;
-
-      img.onload = function () {
-        const canvas = document.createElement("canvas");
-        let width = img.width;
-        let height = img.height;
-
-        // Calculate new dimensions based on max width/height
-        if (width > MAX_WIDTH || height > MAX_HEIGHT) {
-          if (width > height) {
-            height = Math.round((height *= MAX_WIDTH / width));
-            width = MAX_WIDTH;
-          } else {
-            width = Math.round((width *= MAX_HEIGHT / height));
-            height = MAX_HEIGHT;
-          }
-        }
-
-        // Set canvas dimensions to the new dimensions
-        canvas.width = width;
-        canvas.height = height;
-
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-
-        // Compress and convert the image to base64
-        const compressedImage = canvas.toDataURL("image/jpeg", 0.7); // Adjust quality (0.7)
-        setImage(compressedImage); // Set the compressed image
-      };
-    };
-
-    reader.readAsDataURL(imageFile);
-  };
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      // setImage(URL.createObjectURL(file));
-      compressImage(file);
+      compressImage(file); 
     }
   };
 
@@ -223,7 +244,9 @@ const ComplaintForm = ({ onNewComplaint }) => {
     </Form>
      
      <hr/>
- 
+          <pre>
+            {JSON.stringify(complaintHistory, null, 2)}
+          </pre>
 
     </>
     

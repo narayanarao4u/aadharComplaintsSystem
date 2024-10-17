@@ -10,6 +10,7 @@ function ComplaintUpdate() {
     selectedComplaint: complaint,
     setSelectedComplaint,
     updateComplaint,
+    updateComplaintStatus,
     handleImageClick,
   } = React.useContext(ComplaintListContext);
 
@@ -85,10 +86,12 @@ function ComplaintUpdate() {
             <button
               className="bg-green"
               onClick={() => {
-                updateComplaint(complaint._id, "Resolved");
+                console.log('clicked');
+                
+                updateComplaintStatus(complaint._id, "Resolved");
               }}
             >
-              Complaint Resolved
+              Resolved
             </button>
             <button className="bg-red" onClick={() => setSelectedComplaint(null)}>
               Close

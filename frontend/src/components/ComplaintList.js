@@ -57,7 +57,7 @@ const ComplaintList = () => {
         throw new Error("Failed to update complaint status");
       }
 
-      console.log(response);
+      // console.log(response);
 
       setComplaints((prevComplaints) =>
         prevComplaints.map((c) => (c._id === id ? response.data : c))
@@ -68,10 +68,19 @@ const ComplaintList = () => {
     }
   };
 
-  // setSelectedComplaint(null);
-  /*
-    
-      */
+  const updateComplaintStatus = async (id, status, userType = "admin") => {
+    try {
+      console.log('updateComplaintStatus', status);
+      
+      await api.put(`api/complaints/updateComplaintStatus/${id}`, { status });
+      setComplaints(complaints.map((c) => (c._id === id ? { ...c, status } : c)));
+
+      setSelectedComplaint(null);
+    } catch (err) {
+      console.error("Error updating status:", err);
+    }
+  }
+
 
   const selectComplaint = (complaint) => {
     setSelectedComplaint(complaint);
@@ -89,6 +98,7 @@ const ComplaintList = () => {
         selectComplaint,
 
         updateComplaint,
+        updateComplaintStatus,
         selectedImage,
         setSelectedImage,
         handleImageClick,
@@ -148,7 +158,7 @@ const DisplayList = () => {
                 <span>Image not Uploaded </span>
               )}
             </td>
-            <td>Status: {complaint.status}</td>
+            <td>{complaint.status}</td>
 
             <td>
               {complaint.status === "Pending" && (
