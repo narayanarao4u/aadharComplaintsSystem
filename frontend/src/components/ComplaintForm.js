@@ -182,7 +182,7 @@ const ComplaintForm = ({ onNewComplaint }) => {
           id="stationId"
           value={data["stationId"]}
           placeholder="Enter station ID" 
-          maxlength={5}    minLength={5} 
+          maxLength={5}    minLength={5} 
           required   
           
           onChange={handleOnChange}
@@ -206,7 +206,7 @@ const ComplaintForm = ({ onNewComplaint }) => {
 
         <CustomInput disp="Phone Number" name="phone" value={data["phone"]} 
           handleOnChange={handleOnChange}
-          maxlength={"10"} minlength={"10"} 
+          maxLength={"10"} minLength={"10"} 
           placeholder="Enter operator Phone Number"
         />
 
@@ -244,9 +244,7 @@ const ComplaintForm = ({ onNewComplaint }) => {
     </Form>
      
      <hr/>
-          <pre>
-            {JSON.stringify(complaintHistory, null, 2)}
-          </pre>
+          {/* <DisplayList data={data} /> */}
 
     </>
     
