@@ -1,3 +1,4 @@
+const { log } = require("console");
 const Complaint = require("../models/complaintModel");
 const Station = require("../models/stationmodel");
 
@@ -48,9 +49,7 @@ exports.createComplaint = async (req, res) => {
   const data = req.body;
   // console.log(data);
   try {
-    const maxID = await Complaint.aggregate([
-      { $group: { _id: null, maxID: { $max: "$complaintID" } } },
-    ]);
+    const maxID = await Complaint.aggregate([{ $group: { _id: null, maxID: { $max: "$complaintID" } } }]);
 
     const complaintID = maxID.length > 0 ? maxID[0].maxID + 1 : 1;
 
@@ -71,8 +70,6 @@ exports.createComplaint = async (req, res) => {
 
 // Update complaint status
 exports.updateComplaintStatus = async (req, res) => {
-  console.log("Updating complaint status");
-
   const { id } = req.params;
   const { status } = req.body;
 
@@ -86,22 +83,19 @@ exports.updateComplaintStatus = async (req, res) => {
     await complaint.save();
     res.status(200).json(complaint);
   } catch (err) {
+    console.log(err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
 exports.updateComplaint = async (req, res) => {
-  console.log("Updating complaint");
-
   const { id } = req.params;
   const data = req.body;
 
   delete data._id;
 
   try {
-    const complaint = await Complaint.updateOne({ _id: id }, data).then(() =>
-      Complaint.findById(id)
-    );
+    const complaint = await Complaint.updateOne({ _id: id }, data).then(() => Complaint.findById(id));
 
     if (!complaint) {
       return res.status(404).json({ message: "Complaint not found" });

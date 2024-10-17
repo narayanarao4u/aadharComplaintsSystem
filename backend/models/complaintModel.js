@@ -20,7 +20,7 @@ const complaintSchema = new mongoose.Schema(
     },
     satisfied: {
       type: Boolean,
-      default: "null",
+      default: null,
     },
   },
   {
