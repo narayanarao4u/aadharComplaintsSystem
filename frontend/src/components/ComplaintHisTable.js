@@ -2,7 +2,7 @@ import React from "react";
 import Moment from "react-moment";
 
 const ComplaintHisTable = ({ data }) => {
-  const columns = ["complaintID", "createdAt", "complaint", "statisfied"];
+  const columns = ["complaintID", "createdAt", "complaint", "satisfied"];
   const colHead = ["ID", "Date", "Complaint", "Status"];
 
   if (!data || data.length === 0) {
@@ -18,10 +18,10 @@ const ComplaintHisTable = ({ data }) => {
       return <Moment format="DD-MM-YYYY">{row[column]}</Moment>;
     }
 
-    if (column === "statisfied") {
+    if (column === "satisfied") {
       if (row.status === "Pending") {
         return <span className="text-red-600 font-bold">Pending</span>;
-      } else if (row.status === "Resolved" && row[column] === "null") {
+      } else if (row.status === "Resolved" && row[column] === null) {
         return (
           <>
             <span className="text-green-600 font-bold">Complaint Resloved - </span>

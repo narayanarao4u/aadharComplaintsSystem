@@ -18,8 +18,8 @@ const complaintSchema = new mongoose.Schema(
       type: String,
       default: "Pending",
     },
-    statisfied: {
-      type: String,
+    satisfied: {
+      type: Boolean,
       default: "null",
     },
   },

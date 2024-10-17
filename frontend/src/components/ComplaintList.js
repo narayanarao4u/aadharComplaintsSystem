@@ -7,13 +7,12 @@ import ComplaintUpdate from "./ComplaintUpdate";
 
 import DisplayList from "./DisplayList";
 
-
 export const ComplaintListContext = React.createContext();
 
 const ComplaintList = () => {
   const [complaints, setComplaints] = useState([]);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+  // const [showModal, setShowModal] = useState(false);
 
   const [selectedImage, setSelectedImage] = useState(null);
   const handleImageClick = (image) => {
@@ -60,9 +59,7 @@ const ComplaintList = () => {
 
       // console.log(response);
 
-      setComplaints((prevComplaints) =>
-        prevComplaints.map((c) => (c._id === id ? response.data : c))
-      );
+      setComplaints((prevComplaints) => prevComplaints.map((c) => (c._id === id ? response.data : c)));
     } catch (err) {
       console.error("Error updating status:", err);
       // Optionally, you might want to revert the state change here
@@ -71,8 +68,11 @@ const ComplaintList = () => {
 
   const updateComplaintStatus = async (id, status, userType = "admin") => {
     try {
-      console.log('updateComplaintStatus', status);
-      
+      let obj1 = { status };
+      // if(userType === "AEK") {
+
+      // }
+
       await api.put(`api/complaints/updateComplaintStatus/${id}`, { status });
       setComplaints(complaints.map((c) => (c._id === id ? { ...c, status } : c)));
 
@@ -80,12 +80,11 @@ const ComplaintList = () => {
     } catch (err) {
       console.error("Error updating status:", err);
     }
-  }
-
+  };
 
   const selectComplaint = (complaint) => {
     setSelectedComplaint(complaint);
-    setShowModal(true);
+    // setShowModal(true);
   };
 
   return (
@@ -94,11 +93,12 @@ const ComplaintList = () => {
         complaints,
         selectedComplaint,
         setSelectedComplaint,
-        showModal,
-        setShowModal,
+        // showModal,
+        // setShowModal,
         selectComplaint,
 
         updateComplaint,
+        updateComplaintAPI,
         updateComplaintStatus,
         selectedImage,
         setSelectedImage,
@@ -113,7 +113,5 @@ const ComplaintList = () => {
     </ComplaintListContext.Provider>
   );
 };
-
-
 
 export default ComplaintList;
