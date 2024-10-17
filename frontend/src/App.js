@@ -14,6 +14,7 @@ import { toast } from "react-toastify";
 import { Link, Outlet, Route, Routes, useNavigate } from "react-router-dom";
 import ProtectedRoute from "./context/ProtectedRoute";
 import HomePage from "./components/HomePage";
+import Feedback from "./components/Feedback";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="signup" element={<Signup />} />
         <Route path="login" element={<Login />} />
         <Route path="complaints" element={<ComplaintForm />} />
+        <Route path="feedback/:id" element={<Feedback />} />
         <Route
           path="complaintList"
           element={

@@ -1,5 +1,7 @@
 import React from "react";
+import { FaThumbsDown, FaThumbsUp } from "react-icons/fa";
 import Moment from "react-moment";
+import { Link } from "react-router-dom";
 
 const ComplaintHisTable = ({ data }) => {
   const columns = ["complaintID", "createdAt", "complaint", "satisfied"];
@@ -25,19 +27,26 @@ const ComplaintHisTable = ({ data }) => {
         return (
           <>
             <span className="text-green-600 font-bold">Complaint Resloved - </span>
-            <span className="text-blue-600"> - Feedback Pending</span>
+            <span className="text-blue-600 font-bold underline">
+              <Link to={`/feedback/${row._id}`}> - Feedback Pending</Link>
+            </span>
           </>
         );
       } else {
         return (
-          // <SatisfactionField
-          //   initialValue={row[column] === "true"}
-          //   onChange={(value) => {
-          //     console.log(`Updated satisfaction for row to ${value}`);
-          //     // Here you would update the data in your state or backend
-          //   }}
-          // />
-          row[column]
+          <>
+            <span className="flex space-x-4">
+              <span className="text-green-600 font-bold">Complaint Resloved</span>
+              <span
+                className={`p-2 rounded-full transition-colors duration-200 ${
+                  row.satisfied === true ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                }`}
+                aria-label="Yes, I'm satisfied"
+              >
+                {row.satisfied === true ? <FaThumbsUp className="w-4 h-4" /> : <FaThumbsDown className="w-4 h-4" />}
+              </span>
+            </span>
+          </>
         );
       }
     }

@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Moment from "react-moment";
 import { GrEdit } from "react-icons/gr";
 import { ComplaintListContext } from "./ComplaintList";
+import { StatusElement } from "./StatusElement";
 
 //Display List Component
 const DisplayList = () => {
@@ -21,7 +22,7 @@ const DisplayList = () => {
           <th>Complaint</th>
           <th>Images</th>
           <th>Status</th>
-          <th>Status</th>
+          <th></th>
         </tr>
         {complaints.map((complaint) => (
           <tr key={complaint._id}>
@@ -49,11 +50,7 @@ const DisplayList = () => {
               )}
             </td>
             <td>
-              {complaint.status === "Resolved" ? (
-                <span className="text-green-600 font-bold">Resloved</span>
-              ) : (
-                <span className="text-red-600 font-bold">Pending</span>
-              )}
+              <StatusElement status={complaint.status} />
             </td>
 
             <td>

@@ -57,6 +57,7 @@ const ComplaintForm = ({ onNewComplaint }) => {
     try {
       const response = await api.get(`/api/complaints/?stationId=${stationId}`);
       const res = response.data;
+      /*
       const statusResolved = res.filter((complaint) => complaint.status === "Resolved");
       if (statusResolved.length > 0) {
         let recentComplaint = statusResolved[statusResolved.length - 1];
@@ -65,6 +66,7 @@ const ComplaintForm = ({ onNewComplaint }) => {
       }
 
       console.log(statusResolved);
+      */
       setComplaintHistory(res);
     } catch (err) {
       console.error("Error fetching complaints:", err);
@@ -209,14 +211,7 @@ const ComplaintForm = ({ onNewComplaint }) => {
           />
 
           <label htmlFor="complaint">Complaint Discription</label>
-          <textarea
-            name="complaint"
-            id="complaint"
-            value={data["complaint"]}
-            required
-            rows={4}
-            onChange={handleOnChange}
-          />
+          <textarea name="complaint" id="complaint" value={data["complaint"]} required rows={4} onChange={handleOnChange} />
         </section>
 
         <div>
@@ -228,9 +223,7 @@ const ComplaintForm = ({ onNewComplaint }) => {
 
           <div style={{ border: "1px dashed gray", padding: "10px", marginBottom: "10px" }}>
             <p>Error image can be uploaded or Paste image here (Ctrl+V)</p>
-            {image && (
-              <img src={image} alt="pasted" style={{ maxWidth: "200px", maxHeight: "200px" }} />
-            )}
+            {image && <img src={image} alt="pasted" style={{ maxWidth: "200px", maxHeight: "200px" }} />}
           </div>
         </div>
 
@@ -243,8 +236,6 @@ const ComplaintForm = ({ onNewComplaint }) => {
 
       <hr />
       <ComplaintHisTable data={complaintHistory} />
-      <pre>{JSON.stringify(complaintHistory[0], null, 2)}</pre>
-      {/* <DisplayList data={data} /> */}
     </>
   );
 };
@@ -280,15 +271,7 @@ export function CustomInput({ disp, name, type = "text", value, handleOnChange, 
   return (
     <>
       <label htmlFor={name}>{disp} :</label>
-      <input
-        type={type}
-        name={name}
-        id={name}
-        value={value}
-        required
-        {...rest}
-        onChange={handleOnChange}
-      />
+      <input type={type} name={name} id={name} value={value} required {...rest} onChange={handleOnChange} />
     </>
   );
 }
