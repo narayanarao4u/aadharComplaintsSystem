@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect  } from "react";
 import { toast } from "react-toastify";
-import api from "../api";
+
 import GetSummary from "./GetSummary";
 
 function HomePage() {
   useEffect(() => {
     window.scrollTo(0, 0);
-    // toast("Welcome  Complaint Management System");
+     toast("Welcome  ");
   }, []);
 
   return (

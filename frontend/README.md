@@ -4,4 +4,6 @@
 
  Mongorestore /drop /d testdb testdb16102024/
 
+ Mongorestore /drop /d testdb .\testdbHome\testdb\
+
 ```

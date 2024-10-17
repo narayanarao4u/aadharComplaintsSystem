@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { toast } from "react-toastify";
 import api from "../api";
 import "./GetSummary.css";
 
@@ -8,7 +7,7 @@ function GetSummary() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    // toast("Welcome to Aadhar Complaint Management System");
+
 
     const fetchComplaints = async () => {
       const response = await api.get("api/complaints/getSummary");

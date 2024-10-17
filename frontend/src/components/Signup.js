@@ -1,7 +1,7 @@
 import React, { useState, useContext } from "react";
-import AuthContext, { AuthProvider } from "../context/AuthContext";
+import AuthContext from "../context/AuthContext";
 import { baseURL } from "../api";
-import { ToastContainer, toast } from "react-toastify";
+import {  toast } from "react-toastify";
 
 const Signup = () => {
   const [username, setUsername] = useState("");
