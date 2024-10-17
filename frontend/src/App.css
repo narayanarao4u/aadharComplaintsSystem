@@ -2,6 +2,24 @@
   width: 80%;
   margin: auto;
   max-width: 1080px;
+  height: 100vh;
+
+  display: grid;
+  grid-template-rows: 140px 1fr auto;
+
+  background-image: linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%);
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  & footer {
+    background-color: gray;
+    text-align: center;
+    font-weight: bold;
+  }
+
+  & main {
+    overflow: auto;
+  }
 }
 
 .App-logo {

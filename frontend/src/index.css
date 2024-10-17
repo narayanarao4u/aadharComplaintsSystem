@@ -7,9 +7,7 @@ body {
 
   height: 100vh;
   /* background-image: url("bg1.svg"); */
-  background-image: linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%);
-  background-repeat: no-repeat;
-  background-size: cover;
+
   /* overflow: auto; */
 }
 
@@ -34,6 +32,7 @@ button {
   background-color: #f8f8f8;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  font-weight: bold;
 }
 
 /* TEXT */
@@ -49,4 +48,26 @@ h2,
 h3 {
   margin: 0;
 }
+
+.inline {
+  display: inline;
+}
+
 /* TEXT */
+
+/* BG Color */
+.bg-gray {
+  background-color: gray;
+  color: white;
+}
+
+.bg-red {
+  background-color: #fe9900;
+  color: white;
+}
+
+.bg-green {
+  background-color: #00ec00f1;
+  color: white;
+}
+/* BG Color */

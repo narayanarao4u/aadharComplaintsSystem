@@ -49,27 +49,30 @@ function Layout() {
   };
   return (
     <div className="App">
-      <div className="App-header" onClick={() => navigate("/")}>
-        <img src={bsnl} className="bsnl-logo" alt="logo" />
-        <div className="text-center">BSNL Visakhapatnam Complaint Management System</div>
-        <img src={aadhar} className="aadhar-logo" alt="logo" />
-      </div>
-
-      <NAV>
-        <Link to="/complaints">New Complaint</Link>
-        <Link to="/complaintList">Complaint List</Link>
-        {state.isAuthenticated ? (
-          <Link to="/" onClick={handleLogout}>
-            Logout
-          </Link>
-        ) : (
-          <Link to="/login">Login</Link>
-        )}
-      </NAV>
+      <header>
+        <div className="App-header" onClick={() => navigate("/")}>
+          <img src={bsnl} className="bsnl-logo" alt="logo" />
+          <div className="text-center">BSNL Visakhapatnam Complaint Management System</div>
+          <img src={aadhar} className="aadhar-logo" alt="logo" />
+        </div>
+        <NAV>
+          <Link to="/complaints">New Complaint</Link>
+          <Link to="/complaintList">Complaint List</Link>
+          {state.isAuthenticated ? (
+            <Link to="/" onClick={handleLogout}>
+              Logout
+            </Link>
+          ) : (
+            <Link to="/login">Login</Link>
+          )}
+        </NAV>
+      </header>
 
       <main>
         <Outlet />
       </main>
+
+      <footer>BSNL IT Team Visakhapatnam</footer>
     </div>
   );
 }
@@ -78,7 +81,7 @@ const NAV = styled.nav`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
+  padding: 0.25rem;
   background-color: #f8f9fa;
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
   margin-bottom: 15px;

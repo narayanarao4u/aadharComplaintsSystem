@@ -37,16 +37,25 @@ const ComplaintList = () => {
       ...prevComplaint,
       statusInfo: [{ date: new Date(), status }, ...(prevComplaint.statusInfo || [])],
     }));
+
+    try {
+      const response = await api.put(`api/complaints/${id}`, selectedComplaint);
+
+      if (response.status !== 200) {
+        throw new Error("Failed to update complaint status");
+      }
+
+      console.log(response);
+
+      setComplaints(complaints.map((c) => (c._id === id ? response.data : c)));
+    } catch (err) {
+      console.error("Error updating status:", err);
+    }
   };
 
   // setSelectedComplaint(null);
   /*
-    try {
-      await api.put(`api/complaints/${id}`, { status });
-      setComplaints(complaints.map((c) => (c._id === id ? { ...c, status } : c)));
-    } catch (err) {
-      console.error("Error updating status:", err);
-    }
+    
       */
 
   const selectComplaint = (complaint) => {
@@ -59,9 +68,11 @@ const ComplaintList = () => {
       value={{
         complaints,
         selectedComplaint,
+        setSelectedComplaint,
         showModal,
         setShowModal,
         selectComplaint,
+
         updateComplaint,
         selectedImage,
         setSelectedImage,
