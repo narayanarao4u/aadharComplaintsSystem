@@ -82,7 +82,14 @@ function ComplaintUpdate() {
           </div>
 
           <div>
-            <button className="bg-green">Complaint Resolved</button>
+            <button
+              className="bg-green"
+              onClick={() => {
+                updateComplaint(complaint._id, "Resolved");
+              }}
+            >
+              Complaint Resolved
+            </button>
             <button className="bg-red" onClick={() => setSelectedComplaint(null)}>
               Close
             </button>

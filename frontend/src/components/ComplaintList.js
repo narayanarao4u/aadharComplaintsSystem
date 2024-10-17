@@ -32,14 +32,26 @@ const ComplaintList = () => {
     fetchComplaints();
   }, []);
 
-  const updateComplaint = async (id, status) => {
-    setSelectedComplaint((prevComplaint) => ({
-      ...prevComplaint,
-      statusInfo: [{ date: new Date(), status }, ...(prevComplaint.statusInfo || [])],
-    }));
+  const updateComplaint = async (id, status, userType = "admin") => {
+    const newStatusInfo = { date: new Date(), status };
 
+    setSelectedComplaint((prevComplaint) => {
+      const updatedComplaint = {
+        ...prevComplaint,
+        statusInfo: [newStatusInfo, ...(prevComplaint.statusInfo || [])],
+      };
+
+      // Perform the API call here, inside the state update function
+      updateComplaintAPI(id, updatedComplaint);
+
+      return updatedComplaint;
+    });
+  };
+
+  // Separate function for the API call
+  const updateComplaintAPI = async (id, updatedComplaint) => {
     try {
-      const response = await api.put(`api/complaints/${id}`, selectedComplaint);
+      const response = await api.put(`api/complaints/${id}`, updatedComplaint);
 
       if (response.status !== 200) {
         throw new Error("Failed to update complaint status");
@@ -47,9 +59,12 @@ const ComplaintList = () => {
 
       console.log(response);
 
-      setComplaints(complaints.map((c) => (c._id === id ? response.data : c)));
+      setComplaints((prevComplaints) =>
+        prevComplaints.map((c) => (c._id === id ? response.data : c))
+      );
     } catch (err) {
       console.error("Error updating status:", err);
+      // Optionally, you might want to revert the state change here
     }
   };
 
