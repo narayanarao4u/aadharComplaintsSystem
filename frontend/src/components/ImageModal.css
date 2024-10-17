@@ -13,7 +13,7 @@
 
 .modal-content {
   background-color: white;
-  padding: 20px;
+  padding: 10px;
   border-radius: 8px;
   text-align: center;
   position: relative;
@@ -24,12 +24,23 @@
   max-height: 80vh;
 }
 
-.modal-content button {
-  margin-top: 10px;
-  padding: 10px;
-  background-color: #f44336;
-  color: white;
+.modal-content .close-button {
+  position: absolute;
+  top: 0px;
+  right: 0px;
   border: none;
   cursor: pointer;
-  border-radius: 5px;
+  background-color: transparent;
+  color: rgb(255, 60, 0);
+  border: none;
+  cursor: pointer;
+  font-size: 2.5rem;
+  transition: all 0.3s ease;
+}
+
+.close-button:hover {
+  transform: rotate(180deg);
+  font-weight: bold;
+  font-size: 3rem;
+  color: rgb(255, 0, 0);
 }

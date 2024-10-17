@@ -5,12 +5,17 @@ const Station = require("../models/stationmodel");
 exports.getComplaints = async (req, res) => {
   try {
     let complaints;
+    let query = {};
 
     if (req.params.id) {
-      const query = { _id: req.params.id };
+      query = { _id: req.params.id };
+
       complaints = await Complaint.findOne(query);
     } else {
-      complaints = await Complaint.find({}).sort({ complaintID: -1 }) ;
+      if (req.query.stationId) {
+        query = { stationId: req.query.stationId };
+      }
+      complaints = await Complaint.find(query).sort({ complaintID: -1 });
     }
 
     res.status(200).json(complaints);
@@ -66,8 +71,8 @@ exports.createComplaint = async (req, res) => {
 
 // Update complaint status
 exports.updateComplaintStatus = async (req, res) => {
-  console.log('Updating complaint status');
-  
+  console.log("Updating complaint status");
+
   const { id } = req.params;
   const { status } = req.body;
 
@@ -87,7 +92,7 @@ exports.updateComplaintStatus = async (req, res) => {
 
 exports.updateComplaint = async (req, res) => {
   console.log("Updating complaint");
-  
+
   const { id } = req.params;
   const data = req.body;
 

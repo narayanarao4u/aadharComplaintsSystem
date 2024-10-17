@@ -18,6 +18,10 @@ const complaintSchema = new mongoose.Schema(
       type: String,
       default: "Pending",
     },
+    statisfied: {
+      type: String,
+      default: "null",
+    },
   },
   {
     timestamps: true,

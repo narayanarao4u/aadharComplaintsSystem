@@ -3,7 +3,7 @@ import styled from "styled-components";
 import api from "../api";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-
+import ComplaintHisTable from "./ComplaintHisTable";
 
 const ComplaintForm = ({ onNewComplaint }) => {
   const [image, setImage] = useState(null);
@@ -12,6 +12,7 @@ const ComplaintForm = ({ onNewComplaint }) => {
 
   const [stations, setStations] = useState([]);
   const [complaintHistory, setComplaintHistory] = useState([]);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,92 +26,93 @@ const ComplaintForm = ({ onNewComplaint }) => {
     };
 
     fetchStations();
-  },[])
+  }, []);
 
   useEffect(() => {
-
     let stationID = data.stationId;
     if (!stationID) return;
-        
+
     if (stationID.length === 5) {
       const station = stations.find((station) => station.StationId === +stationID);
-      console.log(station);
 
       if (station) {
         setData({
-          ...data,       
-          stationName: station.AEK_LOCATION,        
-        })  
+          ...data,
+          stationName: station.AEK_LOCATION,
+        });
 
         getComplaintsbyStionID(stationID);
       }
-      
     } else {
       setData({
         ...data,
         stationName: "",
       });
+
+      setComplaintHistory([]);
     }
+  }, [data.stationId]);
 
-    
-  }, [data.stationId])
-
-  const getComplaintsbyStionID = async (stationID) => {
+  const getComplaintsbyStionID = async (stationId) => {
     try {
-      const response = await api.get(`/api/complaints/?stationID=${stationID}`);
-      
-      setComplaintHistory(response.data);
+      const response = await api.get(`/api/complaints/?stationId=${stationId}`);
+      const res = response.data;
+      const statusResolved = res.filter((complaint) => complaint.status === "Resolved");
+      if (statusResolved.length > 0) {
+        let recentComplaint = statusResolved[statusResolved.length - 1];
+        setData(recentComplaint);
+        setImage(recentComplaint.image);
+      }
 
+      console.log(statusResolved);
+      setComplaintHistory(res);
     } catch (err) {
       console.error("Error fetching complaints:", err);
     }
-  }
-
-  
-// Function to compress the image
- const compressImage = (imageFile) => {
-  // Set the max width/height for the image
-  const MAX_WIDTH = 1024;
-  const MAX_HEIGHT = 800;
-  const reader = new FileReader();
-
-  reader.onload = function (e) {
-    const img = new Image();
-    img.src = e.target.result;
-
-    img.onload = function () {
-      const canvas = document.createElement("canvas");
-      let width = img.width;
-      let height = img.height;
-
-      // Calculate new dimensions based on max width/height
-      if (width > MAX_WIDTH || height > MAX_HEIGHT) {
-        if (width > height) {
-          height = Math.round((height *= MAX_WIDTH / width));
-          width = MAX_WIDTH;
-        } else {
-          width = Math.round((width *= MAX_HEIGHT / height));
-          height = MAX_HEIGHT;
-        }
-      }
-
-      // Set canvas dimensions to the new dimensions
-      canvas.width = width;
-      canvas.height = height;
-
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0, width, height);
-
-      // Compress and convert the image to base64
-      const compressedImage = canvas.toDataURL("image/jpeg", 0.7); // Adjust quality (0.7)
-      setImage(compressedImage); // Set the compressed image
-      
-    };
   };
 
-  reader.readAsDataURL(imageFile);
-};
+  // Function to compress the image
+  const compressImage = (imageFile) => {
+    // Set the max width/height for the image
+    const MAX_WIDTH = 1024;
+    const MAX_HEIGHT = 800;
+    const reader = new FileReader();
 
+    reader.onload = function (e) {
+      const img = new Image();
+      img.src = e.target.result;
+
+      img.onload = function () {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+
+        // Calculate new dimensions based on max width/height
+        if (width > MAX_WIDTH || height > MAX_HEIGHT) {
+          if (width > height) {
+            height = Math.round((height *= MAX_WIDTH / width));
+            width = MAX_WIDTH;
+          } else {
+            width = Math.round((width *= MAX_HEIGHT / height));
+            height = MAX_HEIGHT;
+          }
+        }
+
+        // Set canvas dimensions to the new dimensions
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Compress and convert the image to base64
+        const compressedImage = canvas.toDataURL("image/jpeg", 0.7); // Adjust quality (0.7)
+        setImage(compressedImage); // Set the compressed image
+      };
+    };
+
+    reader.readAsDataURL(imageFile);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -123,9 +125,9 @@ const ComplaintForm = ({ onNewComplaint }) => {
 
     try {
       const response = await api.post("api/complaints", fdata);
-      if( response.status != 201) {
+      if (response.status !== 201) {
         console.log(response);
-        
+
         throw new Error("Failed to create complaint");
       }
 
@@ -136,8 +138,6 @@ const ComplaintForm = ({ onNewComplaint }) => {
     }
   };
 
-
-
   // Handle paste event to capture and compress the image
   const handlePaste = (event) => {
     event.preventDefault();
@@ -146,108 +146,106 @@ const ComplaintForm = ({ onNewComplaint }) => {
     for (let i = 0; i < items.length; i++) {
       if (items[i].type.indexOf("image") !== -1) {
         const blob = items[i].getAsFile();
-        
+
         compressImage(blob); // Compress the pasted image
         // cropImage(blob); // Crop the pasted image
-
-    
       }
     }
   };
 
-
-
-
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      compressImage(file); 
+      compressImage(file);
     }
   };
 
-
-
   const handleOnChange = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
-  }
+  };
 
   return (
     <>
       <Form onSubmit={handleSubmit} onPaste={handlePaste}>
-      <section>
-        <label htmlFor="stationId">Station ID</label>
-        <input
-          type="text"
-          name="stationId"
-          id="stationId"
-          value={data["stationId"]}
-          placeholder="Enter station ID" 
-          maxLength={5}    minLength={5} 
-          required   
-          
-          onChange={handleOnChange}
-        />
+        <section>
+          <label htmlFor="stationId">Station ID</label>
+          <input
+            type="text"
+            name="stationId"
+            id="stationId"
+            value={data["stationId"]}
+            placeholder="Enter station ID"
+            maxLength={5}
+            minLength={5}
+            required
+            onChange={handleOnChange}
+          />
 
+          <CustomInput
+            disp="Station Name"
+            name="stationName"
+            value={data["stationName"]}
+            placeholder="Enter station name"
+            handleOnChange={handleOnChange}
+            readOnly={true}
+          />
 
-
-        <CustomInput
-          disp="Station Name"
-          name="stationName"
-          value={data["stationName"]}
-          placeholder="Enter station name"
-          handleOnChange={handleOnChange}
-          readOnly={true}
-        />
-
-        <CustomInput disp="Operator Name" name="Operatorname" value={data["Operatorname"]} 
+          <CustomInput
+            disp="Operator Name"
+            name="Operatorname"
+            value={data["Operatorname"]}
             handleOnChange={handleOnChange}
             placeholder="Enter operator name"
-            />
+          />
 
-        <CustomInput disp="Phone Number" name="phone" value={data["phone"]} 
-          handleOnChange={handleOnChange}
-          maxLength={"10"} minLength={"10"} 
-          placeholder="Enter operator Phone Number"
-        />
+          <CustomInput
+            disp="Phone Number"
+            name="phone"
+            value={data["phone"]}
+            handleOnChange={handleOnChange}
+            maxLength={"10"}
+            minLength={"10"}
+            placeholder="Enter operator Phone Number"
+          />
 
-        <label htmlFor="complaint">Complaint Discription</label>
-        <textarea
-          name="complaint"
-          id="complaint"
-          value={data["complaint"]}
-          required
-          rows={4}
-          onChange={handleOnChange}
-          
+          <label htmlFor="complaint">Complaint Discription</label>
+          <textarea
+            name="complaint"
+            id="complaint"
+            value={data["complaint"]}
+            required
+            rows={4}
+            onChange={handleOnChange}
+          />
+        </section>
 
-        />
-      </section>
+        <div>
+          {/* File input to upload image */}
+          <div className="file-input">
+            <label htmlFor="stationId">Upload Error Image</label>
+            <input type="file" accept="image/*" onChange={handleFileUpload} />
+          </div>
 
-      <div>
-        {/* File input to upload image */}
-        <div className="file-input">
-          <label htmlFor="stationId">Upload Error Image</label>
-          <input type="file" accept="image/*" onChange={handleFileUpload} />
+          <div style={{ border: "1px dashed gray", padding: "10px", marginBottom: "10px" }}>
+            <p>Error image can be uploaded or Paste image here (Ctrl+V)</p>
+            {image && (
+              <img src={image} alt="pasted" style={{ maxWidth: "200px", maxHeight: "200px" }} />
+            )}
+          </div>
         </div>
 
-        <div style={{ border: "1px dashed gray", padding: "10px", marginBottom: "10px" }}>
-          <p>Error image can be uploaded or Paste image here (Ctrl+V)</p>
-          {image && (
-            <img src={image} alt="pasted" style={{ maxWidth: "200px", maxHeight: "200px" }} />
-          )}
+        <div>
+          <button type="submit" disabled={!data?.stationName}>
+            Submit
+          </button>
         </div>
-      </div>
+      </Form>
 
-      <div>
-        <button type="submit" disabled={!data?.stationName}>Submit</button>
-      </div>
-    </Form>
-     
-     <hr/>
-          {/* <DisplayList data={data} /> */}
-
+      <hr />
+      <ComplaintHisTable data={complaintHistory} />
+      <pre>{JSON.stringify(complaintHistory[0], null, 2)}</pre>
+      {/* <DisplayList data={data} /> */}
     </>
-    
   );
 };
 
@@ -266,7 +264,7 @@ const Form = styled.form`
 
   section {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 180px 1fr;
     gap: 10px;
     margin-bottom: 10px;
   }
@@ -278,11 +276,19 @@ const Form = styled.form`
   }
 `;
 
-export function CustomInput({ disp, name,  type = "text", value, handleOnChange, ...rest }) {
+export function CustomInput({ disp, name, type = "text", value, handleOnChange, ...rest }) {
   return (
     <>
       <label htmlFor={name}>{disp} :</label>
-      <input type={type} name={name} id={name} value={value} required {...rest} onChange={handleOnChange}/>
+      <input
+        type={type}
+        name={name}
+        id={name}
+        value={value}
+        required
+        {...rest}
+        onChange={handleOnChange}
+      />
     </>
   );
 }
