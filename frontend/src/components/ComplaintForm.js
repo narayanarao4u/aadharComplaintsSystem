@@ -1,95 +1,72 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import styled from "styled-components";
-import api from "../api";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { LuSendHorizonal } from "react-icons/lu";
+import api from "../api";
 import ComplaintHisTable from "./ComplaintHisTable";
 
+const MAX_WIDTH = 1024;
+const MAX_HEIGHT = 800;
+
 const ComplaintForm = ({ onNewComplaint }) => {
+  const [formData, setFormData] = useState({
+    stationId: "",
+    stationName: "",
+    Operatorname: "",
+    phone: "",
+    complaint: "",
+  });
   const [image, setImage] = useState(null);
-
-  const [data, setData] = useState({});
-
   const [stations, setStations] = useState([]);
   const [complaintHistory, setComplaintHistory] = useState([]);
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchStations = async () => {
-      try {
-        const response = await api.get("/api/complaints/stationData");
-        setStations(response.data);
-      } catch (err) {
-        console.error("Error fetching stations:", err);
-      }
-    };
-
-    fetchStations();
+  const fetchStations = useCallback(async () => {
+    try {
+      const response = await api.get("/api/complaints/stationData");
+      setStations(response.data);
+    } catch (err) {
+      console.error("Error fetching stations:", err);
+    }
   }, []);
 
   useEffect(() => {
-    let stationID = data.stationId;
-    if (!stationID) return;
+    fetchStations();
+  }, [fetchStations]);
 
-    if (stationID.length === 5) {
-      const station = stations.find((station) => station.StationId === +stationID);
-
-      if (station) {
-        setData({
-          ...data,
-          stationName: station.AEK_LOCATION,
-        });
-
-        getComplaintsbyStionID(stationID);
-      }
-    } else {
-      setData({
-        ...data,
-        stationName: "",
-      });
-
-      setComplaintHistory([]);
-    }
-  }, [data.stationId]);
-
-  const getComplaintsbyStionID = async (stationId) => {
+  const getComplaintsbyStationID = useCallback(async (stationId) => {
     try {
       const response = await api.get(`/api/complaints/?stationId=${stationId}`);
-      const res = response.data;
-      /*
-      const statusResolved = res.filter((complaint) => complaint.status === "Resolved");
-      if (statusResolved.length > 0) {
-        let recentComplaint = statusResolved[statusResolved.length - 1];
-        setData(recentComplaint);
-        setImage(recentComplaint.image);
-      }
-
-      console.log(statusResolved);
-      */
-      setComplaintHistory(res);
+      setComplaintHistory(response.data);
     } catch (err) {
       console.error("Error fetching complaints:", err);
     }
-  };
+  }, []);
 
-  // Function to compress the image
-  const compressImage = (imageFile) => {
-    // Set the max width/height for the image
-    const MAX_WIDTH = 1024;
-    const MAX_HEIGHT = 800;
+  useEffect(() => {
+    const { stationId } = formData;
+    if (stationId.length === 5) {
+      const station = stations.find((s) => s.StationId === +stationId);
+      if (station) {
+        setFormData((prev) => ({ ...prev, stationName: station.AEK_LOCATION }));
+        getComplaintsbyStationID(stationId);
+      }
+    } else {
+      setFormData((prev) => ({ ...prev, stationName: "" }));
+      setComplaintHistory([]);
+    }
+  }, [formData.stationId, stations, getComplaintsbyStationID]);
+
+  const compressImage = useCallback((imageFile) => {
     const reader = new FileReader();
-
-    reader.onload = function (e) {
+    reader.onload = (e) => {
       const img = new Image();
-      img.src = e.target.result;
-
-      img.onload = function () {
+      img.onload = () => {
         const canvas = document.createElement("canvas");
-        let width = img.width;
-        let height = img.height;
+        let { width, height } = img;
 
-        // Calculate new dimensions based on max width/height
         if (width > MAX_WIDTH || height > MAX_HEIGHT) {
           if (width > height) {
             height = Math.round((height *= MAX_WIDTH / width));
@@ -100,136 +77,121 @@ const ComplaintForm = ({ onNewComplaint }) => {
           }
         }
 
-        // Set canvas dimensions to the new dimensions
         canvas.width = width;
         canvas.height = height;
-
         const ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0, width, height);
-
-        // Compress and convert the image to base64
-        const compressedImage = canvas.toDataURL("image/jpeg", 0.7); // Adjust quality (0.7)
-        setImage(compressedImage); // Set the compressed image
+        const compressedImage = canvas.toDataURL("image/jpeg", 0.7);
+        setImage(compressedImage);
       };
+      img.src = e.target.result;
     };
-
     reader.readAsDataURL(imageFile);
-  };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const frmData = new FormData(e.target);
-    // console.log(Object.fromEntries(frmData.entries()))
-
-    const fdata = Object.fromEntries(frmData.entries());
-    fdata.image = image;
-    console.log(fdata);
+    const formDataToSubmit = new FormData(e.target);
+    formDataToSubmit.append("image", image);
 
     try {
-      const response = await api.post("api/complaints", fdata);
-      if (response.status !== 201) {
-        console.log(response);
-
+      const response = await api.post("api/complaints", formDataToSubmit);
+      if (response.status === 201) {
+        toast.success("Complaint created successfully");
+        navigate("/");
+      } else {
         throw new Error("Failed to create complaint");
       }
-
-      toast.success("Complaint created successfully");
-      navigate("/"); // Redirect to the complaint list page
     } catch (err) {
       console.error("Error creating complaint:", err);
+      toast.error("Failed to create complaint");
     }
   };
 
-  // Handle paste event to capture and compress the image
-  const handlePaste = (event) => {
-    event.preventDefault();
-    const items = event.clipboardData.items;
-
-    for (let i = 0; i < items.length; i++) {
-      if (items[i].type.indexOf("image") !== -1) {
-        const blob = items[i].getAsFile();
-
-        compressImage(blob); // Compress the pasted image
-        // cropImage(blob); // Crop the pasted image
+  const handlePaste = useCallback(
+    (event) => {
+      const items = event.clipboardData.items;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf("image") !== -1) {
+          compressImage(items[i].getAsFile());
+          break;
+        }
       }
-    }
-  };
+    },
+    [compressImage]
+  );
 
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      compressImage(file);
-    }
-  };
+  const handleFileUpload = useCallback(
+    (event) => {
+      const file = event.target.files[0];
+      if (file) compressImage(file);
+    },
+    [compressImage]
+  );
 
-  const handleOnChange = (e) => {
-    setData({ ...data, [e.target.name]: e.target.value });
-  };
+  const handleChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  }, []);
+
+  const isSubmitDisabled = useMemo(() => !formData.stationName, [formData.stationName]);
 
   return (
     <>
       <Form onSubmit={handleSubmit} onPaste={handlePaste}>
         <section>
-          <label htmlFor="stationId">Station ID</label>
-          <input
-            type="text"
+          <CustomInput
+            disp="Station ID"
             name="stationId"
-            id="stationId"
-            value={data["stationId"]}
+            value={formData.stationId}
+            onChange={handleChange}
             placeholder="Enter station ID"
             maxLength={5}
             minLength={5}
             required
-            onChange={handleOnChange}
           />
-
           <CustomInput
             disp="Station Name"
             name="stationName"
-            value={data["stationName"]}
+            value={formData.stationName}
+            onChange={handleChange}
             placeholder="Enter station name"
-            handleOnChange={handleOnChange}
-            readOnly={true}
+            readOnly
           />
-
           <CustomInput
             disp="Operator Name"
             name="Operatorname"
-            value={data["Operatorname"]}
-            handleOnChange={handleOnChange}
+            value={formData.Operatorname}
+            onChange={handleChange}
             placeholder="Enter operator name"
           />
-
           <CustomInput
             disp="Phone Number"
             name="phone"
-            value={data["phone"]}
-            handleOnChange={handleOnChange}
-            maxLength={"10"}
-            minLength={"10"}
+            value={formData.phone}
+            onChange={handleChange}
             placeholder="Enter operator Phone Number"
+            maxLength={10}
+            minLength={10}
           />
-
-          <label htmlFor="complaint">Complaint Discription</label>
-          <textarea name="complaint" id="complaint" value={data["complaint"]} required rows={4} onChange={handleOnChange} />
+          <label htmlFor="complaint">Complaint Description</label>
+          <textarea name="complaint" id="complaint" value={formData.complaint} onChange={handleChange} required rows={4} />
         </section>
 
         <div>
-          {/* File input to upload image */}
           <div className="file-input">
-            <label htmlFor="stationId">Upload Error Image</label>
-            <input type="file" accept="image/*" onChange={handleFileUpload} />
+            <label htmlFor="imageUpload">Upload Error Image</label>
+            <input id="imageUpload" type="file" accept="image/*" onChange={handleFileUpload} />
           </div>
-
-          <div style={{ border: "1px dashed gray", padding: "10px", marginBottom: "10px" }}>
+          <ImagePreview>
             <p>Error image can be uploaded or Paste image here (Ctrl+V)</p>
-            {image && <img src={image} alt="pasted" style={{ maxWidth: "200px", maxHeight: "200px" }} />}
-          </div>
+            {image && <img src={image} alt="pasted" />}
+          </ImagePreview>
         </div>
 
         <div>
-          <button type="submit" disabled={!data?.stationName}>
-            Submit
+          <button type="submit" disabled={isSubmitDisabled}>
+            Submit <LuSendHorizonal />
           </button>
         </div>
       </Form>
@@ -245,7 +207,6 @@ const Form = styled.form`
   border: 3px solid #ccc;
   border-radius: 10px;
   box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1);
-
   display: grid;
   grid-template-columns: minmax(320px, 1fr) 1fr;
   gap: 10px;
@@ -267,13 +228,22 @@ const Form = styled.form`
   }
 `;
 
-export function CustomInput({ disp, name, type = "text", value, handleOnChange, ...rest }) {
-  return (
-    <>
-      <label htmlFor={name}>{disp} :</label>
-      <input type={type} name={name} id={name} value={value} required {...rest} onChange={handleOnChange} />
-    </>
-  );
-}
+const ImagePreview = styled.div`
+  border: 1px dashed gray;
+  padding: 10px;
+  margin-bottom: 10px;
+
+  img {
+    max-width: 200px;
+    max-height: 200px;
+  }
+`;
+
+const CustomInput = ({ disp, ...props }) => (
+  <>
+    <label htmlFor={props.name}>{disp} :</label>
+    <input type="text" id={props.name} required {...props} />
+  </>
+);
 
 export default ComplaintForm;

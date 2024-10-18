@@ -45,6 +45,7 @@ function Feedback() {
       }
 
       toast.success("Complaint status updated successfully");
+      React.navigate("/");
     } catch (err) {
       console.error("Error updating status:", err);
       // Optionally, you might want to revert the state change here
