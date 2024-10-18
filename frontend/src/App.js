@@ -15,6 +15,7 @@ import { Link, Outlet, Route, Routes, useNavigate } from "react-router-dom";
 import ProtectedRoute from "./context/ProtectedRoute";
 import HomePage from "./components/HomePage";
 import Feedback from "./components/Feedback";
+import { GoHomeFill } from "react-icons/go";
 
 function App() {
   return (
@@ -58,6 +59,7 @@ function Layout() {
           <img src={aadhar} className="aadhar-logo" alt="logo" />
         </div>
         <NAV>
+          <Link to="/" className="flex items-center gap-1"> <GoHomeFill />  <span>Home</span> </Link>
           <Link to="/complaints">New Complaint</Link>
           <Link to="/complaintList">Complaint List</Link>
           {state.isAuthenticated ? (

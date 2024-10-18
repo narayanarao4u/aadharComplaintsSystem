@@ -5,6 +5,11 @@ import VerticalTimeline from "./VerticalTimeline";
 import { toast } from "react-toastify";
 import { FaPlusCircle, FaThumbsDown, FaThumbsUp } from "react-icons/fa";
 import ComplaintInfo from "./ComplaintInfo";
+import { FaCheckCircle } from "react-icons/fa";
+import { MdExitToApp } from "react-icons/md";
+import { VscFeedback } from "react-icons/vsc";
+
+
 
 const ComplaintUpdate = () => {
   const {
@@ -49,7 +54,7 @@ const ComplaintUpdate = () => {
             <VerticalTimeline statusInfo={complaint.statusInfo} />
             {complaint.satisfied !== null && (
               <>
-                <h2 className="text-center bg-yellow-500 py-2 my-2">Feedback</h2>
+                <h2 className=" bg-yellow-500 py-2 my-2 flex items-center gap-2 justify-center"><span>Feedback</span> <VscFeedback /> </h2>
                 <span className="flex space-x-4">
                   <span className="text-green-600 font-bold"> {complaint.feedback}</span>
                   <span
@@ -73,7 +78,7 @@ const ComplaintUpdate = () => {
 const Entry = ({
   handleUpdateClick,
   updateComplaintStatus,
-  handleSubmitFeedback,
+ 
   setSelectedComplaint,
   status,
   setStatus,
@@ -90,11 +95,11 @@ const Entry = ({
         </button>
       </div>
       <div className="flex space-x-4 justify-center">
-        <button className="bg-green-600 text-white" onClick={() => updateComplaintStatus(complaint._id, "Resolved")}>
-          Resolved
+        <button className="bg-green-600 text-white flex items-center gap-2" onClick={() => updateComplaintStatus(complaint._id, "Resolved")}>
+          Resolved <FaCheckCircle />
         </button>
-        <button className="bg-red-500 text-white" onClick={() => setSelectedComplaint(null)}>
-          Close
+        <button className="bg-red-500 text-white  flex items-center gap-2" onClick={() => setSelectedComplaint(null)}>
+          Close <MdExitToApp />
         </button>
       </div>
     </div>

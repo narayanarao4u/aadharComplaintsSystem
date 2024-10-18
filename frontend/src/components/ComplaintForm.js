@@ -91,8 +91,9 @@ const ComplaintForm = ({ onNewComplaint }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formDataToSubmit = new FormData(e.target);
-    formDataToSubmit.append("image", image);
+    const formDataToSubmit = formData;    
+
+    formDataToSubmit.image =  image;
 
     try {
       const response = await api.post("api/complaints", formDataToSubmit);
