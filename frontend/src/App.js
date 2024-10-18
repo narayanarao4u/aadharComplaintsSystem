@@ -54,7 +54,7 @@ function Layout() {
       <header>
         <div className="App-header" onClick={() => navigate("/")}>
           <img src={bsnl} className="bsnl-logo" alt="logo" />
-          <div className="text-center">BSNL Visakhapatnam Complaint Management System</div>
+          <div className="title">BSNL Visakhapatnam Complaint Management System</div>
           <img src={aadhar} className="aadhar-logo" alt="logo" />
         </div>
         <NAV>

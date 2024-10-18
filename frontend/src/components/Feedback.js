@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import api from "../api";
 import ComplaintInfo from "./ComplaintInfo";
 import SatisfactionField from "../context/SatisfactionField";
@@ -9,6 +9,8 @@ function Feedback() {
   const { id } = useParams();
 
   const [complaint, setComplaint] = useState({});
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchComplaint = async () => {
@@ -34,6 +36,7 @@ function Feedback() {
     }
 
     updateComplaintAPI(complaint._id, complaint);
+    navigate("/");
   };
 
   const updateComplaintAPI = async (id, updatedComplaint) => {

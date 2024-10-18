@@ -58,6 +58,12 @@
   & .aadhar-logo {
     height: 100px;
   }
+  & .title {
+    font-size: 1.75rem;
+    font-weight: bolder;
+
+    text-shadow: 2px 2px 4px rgb(104, 159, 211);
+  }
 }
 
 .App-link {

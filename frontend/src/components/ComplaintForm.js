@@ -190,8 +190,12 @@ const ComplaintForm = ({ onNewComplaint }) => {
         </div>
 
         <div>
-          <button type="submit" disabled={isSubmitDisabled}>
-            Submit <LuSendHorizonal />
+          <button
+            type="submit"
+            disabled={isSubmitDisabled}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+          >
+            Submit <LuSendHorizonal className="ml-2" />
           </button>
         </div>
       </Form>
@@ -203,7 +207,7 @@ const ComplaintForm = ({ onNewComplaint }) => {
 };
 
 const Form = styled.form`
-  background-image: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%);
+  background-image: linear-gradient(135deg, #e2d1c3 20%, #fdfcfb 80%);
   border: 3px solid #ccc;
   border-radius: 10px;
   box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1);

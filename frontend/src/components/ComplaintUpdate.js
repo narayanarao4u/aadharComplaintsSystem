@@ -51,18 +51,22 @@ const ComplaintUpdate = () => {
           <div>
             <h3>Status Info</h3>
             <VerticalTimeline statusInfo={complaint.statusInfo} />
-            <h2 className="text-center bg-yellow-500 py-2 my-2">Feedback</h2>
-            <span className="flex space-x-4">
-              <span className="text-green-600 font-bold"> {complaint.feedback}</span>
-              <span
-                className={`p-2 rounded-full transition-colors duration-200 ${
-                  complaint.satisfied === true ? "bg-green-500 text-white" : "bg-red-500 text-white"
-                }`}
-                aria-label="Yes, I'm satisfied"
-              >
-                {complaint.satisfied === true ? <FaThumbsUp className="w-4 h-4" /> : <FaThumbsDown className="w-4 h-4" />}
-              </span>
-            </span>
+            {complaint.satisfied !== null && (
+              <>
+                <h2 className="text-center bg-yellow-500 py-2 my-2">Feedback</h2>
+                <span className="flex space-x-4">
+                  <span className="text-green-600 font-bold"> {complaint.feedback}</span>
+                  <span
+                    className={`p-2 rounded-full transition-colors duration-200 ${
+                      complaint.satisfied === true ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                    }`}
+                    aria-label="Yes, I'm satisfied"
+                  >
+                    {complaint.satisfied === true ? <FaThumbsUp className="w-4 h-4" /> : <FaThumbsDown className="w-4 h-4" />}
+                  </span>
+                </span>
+              </>
+            )}
           </div>
         )}
       </ComplaintWrapper>

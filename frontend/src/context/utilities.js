@@ -45,46 +45,34 @@ export const cropImage = (imageFile) => {
   reader.readAsDataURL(imageFile);
 };
 
-// Function to compress the image
-export const compressImage = (imageFile) => {
-  // Set the max width/height for the image
-  const MAX_WIDTH = 1024;
-  const MAX_HEIGHT = 800;
-  const reader = new FileReader();
+export const compressImage = (imageFile, maxWidth = 1024, maxHeight = 800) => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let { width, height } = img;
 
-  reader.onload = function (e) {
-    const img = new Image();
-    img.src = e.target.result;
-
-    img.onload = function () {
-      const canvas = document.createElement("canvas");
-      let width = img.width;
-      let height = img.height;
-
-      // Calculate new dimensions based on max width/height
-      if (width > MAX_WIDTH || height > MAX_HEIGHT) {
-        if (width > height) {
-          height = Math.round((height *= MAX_WIDTH / width));
-          width = MAX_WIDTH;
-        } else {
-          width = Math.round((width *= MAX_HEIGHT / height));
-          height = MAX_HEIGHT;
+        if (width > maxWidth || height > maxHeight) {
+          if (width > height) {
+            height = Math.round((height *= maxWidth / width));
+            width = maxWidth;
+          } else {
+            width = Math.round((width *= maxHeight / height));
+            height = maxHeight;
+          }
         }
-      }
 
-      // Set canvas dimensions to the new dimensions
-      canvas.width = width;
-      canvas.height = height;
-
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0, width, height);
-
-      // Compress and convert the image to base64
-      const compressedImage = canvas.toDataURL("image/jpeg", 0.7); // Adjust quality (0.7)
-      //setImage(compressedImage); // Set the compressed image
-      
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressedImage = canvas.toDataURL("image/jpeg", 0.7);
+        resolve(compressedImage);
+      };
+      img.src = e.target.result;
     };
-  };
-
-  reader.readAsDataURL(imageFile);
+    reader.readAsDataURL(imageFile);
+  });
 };
