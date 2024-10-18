@@ -68,8 +68,6 @@ const ComplaintList = () => {
 
   const updateComplaintStatus = async (id, status, userType = "admin") => {
     try {
-      let obj1 = { status };
-
       await api.put(`api/complaints/updateComplaintStatus/${id}`, { status: status });
 
       setComplaints(complaints.map((c) => (c._id === id ? { ...c, status } : c)));

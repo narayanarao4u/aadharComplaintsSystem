@@ -1,10 +1,8 @@
 import React, { useContext, useState } from "react";
 import styled from "styled-components";
 import { ComplaintListContext } from "./ComplaintList";
-import Moment from "react-moment";
 import VerticalTimeline from "./VerticalTimeline";
 import { toast } from "react-toastify";
-import SatisfactionField from "../context/SatisfactionField";
 import { FaPlusCircle, FaThumbsDown, FaThumbsUp } from "react-icons/fa";
 import ComplaintInfo from "./ComplaintInfo";
 
@@ -14,8 +12,6 @@ const ComplaintUpdate = () => {
     setSelectedComplaint,
     updateComplaint,
     updateComplaintStatus,
-    handleImageClick,
-    updateComplaintAPI,
   } = useContext(ComplaintListContext);
 
   const [status, setStatus] = useState("");
