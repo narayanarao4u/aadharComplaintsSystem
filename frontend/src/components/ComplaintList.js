@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from "react";
-
 import api from "../api";
-import ImageModal from "./ImageModal";
-
 import ComplaintUpdate from "./ComplaintUpdate";
-
 import DisplayList from "./DisplayList";
 
 export const ComplaintListContext = React.createContext();
@@ -12,16 +8,6 @@ export const ComplaintListContext = React.createContext();
 const ComplaintList = () => {
   const [complaints, setComplaints] = useState([]);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
-  // const [showModal, setShowModal] = useState(false);
-
-  const [selectedImage, setSelectedImage] = useState(null);
-  const handleImageClick = (image) => {
-    setSelectedImage(image);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedImage(null);
-  };
 
   const fetchComplaints = async () => {
     const response = await api.get("api/complaints");
@@ -32,80 +18,33 @@ const ComplaintList = () => {
     fetchComplaints();
   }, []);
 
-  const updateComplaint = async (id, status, userType = "admin") => {
-    const newStatusInfo = { date: new Date(), status };
-
-    setSelectedComplaint((prevComplaint) => {
-      const updatedComplaint = {
-        ...prevComplaint,
-        statusInfo: [newStatusInfo, ...(prevComplaint.statusInfo || [])],
-      };
-
-      // Perform the API call here, inside the state update function
-      updateComplaintAPI(id, updatedComplaint);
-
-      return updatedComplaint;
-    });
-  };
-
-  // Separate function for the API call
-  const updateComplaintAPI = async (id, updatedComplaint) => {
-    try {
-      const response = await api.put(`api/complaints/${id}`, updatedComplaint);
-
-      if (response.status !== 200) {
-        throw new Error("Failed to update complaint status");
-      }
-
-      // console.log(response);
-
-      setComplaints((prevComplaints) => prevComplaints.map((c) => (c._id === id ? response.data : c)));
-    } catch (err) {
-      console.error("Error updating status:", err);
-      // Optionally, you might want to revert the state change here
-    }
-  };
-
-  const updateComplaintStatus = async (id, status, userType = "admin") => {
-    try {
-      await api.put(`api/complaints/updateComplaintStatus/${id}`, { status: status });
-
-      setComplaints(complaints.map((c) => (c._id === id ? { ...c, status } : c)));
-
-      setSelectedComplaint(null);
-    } catch (err) {
-      console.error("Error updating status:", err);
-    }
-  };
-
   const selectComplaint = (complaint) => {
     setSelectedComplaint(complaint);
-    // setShowModal(true);
   };
 
   return (
     <ComplaintListContext.Provider
       value={{
         complaints,
+        setComplaints,
         selectedComplaint,
         setSelectedComplaint,
-        // showModal,
-        // setShowModal,
         selectComplaint,
-
-        updateComplaint,
-        updateComplaintAPI,
-        updateComplaintStatus,
-        selectedImage,
-        setSelectedImage,
-        handleImageClick,
-        handleCloseModal,
       }}
     >
-      <div>{selectedComplaint ? <ComplaintUpdate /> : <DisplayList />}</div>
-
-      {/* Image Modal */}
-      <ImageModal image={selectedImage} onClose={handleCloseModal} />
+      <div>
+        {selectedComplaint ? (
+          <ComplaintUpdate
+            complaint={selectedComplaint}
+            onComplaintUpdate={(updatedComplaint) => {
+              setComplaints(complaints.map((c) => (c._id === updatedComplaint._id ? updatedComplaint : c)));
+              setSelectedComplaint(null);
+            }}
+          />
+        ) : (
+          <DisplayList />
+        )}
+      </div>
     </ComplaintListContext.Provider>
   );
 };
