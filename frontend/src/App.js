@@ -48,7 +48,7 @@ function Layout() {
     dispatch({ type: "LOGOUT" }); // Dispatch the logout action
     localStorage.removeItem("token");
     toast("Logged out successfully");
-    window.location.reload();
+    navigate("/");
   };
   return (
     <div className="App">
@@ -59,7 +59,10 @@ function Layout() {
           <img src={aadhar} className="aadhar-logo" alt="logo" />
         </div>
         <NAV>
-          <Link to="/" className="flex items-center gap-1"> <GoHomeFill />  <span>Home</span> </Link>
+          <Link to="/" className="flex items-center gap-1">
+            {" "}
+            <GoHomeFill /> <span>Home</span>{" "}
+          </Link>
           <Link to="/complaints">New Complaint</Link>
           <Link to="/complaintList">Complaint List</Link>
           {state.isAuthenticated ? (
