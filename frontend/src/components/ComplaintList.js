@@ -8,6 +8,7 @@ export const ComplaintListContext = React.createContext();
 const ComplaintList = () => {
   const [complaints, setComplaints] = useState([]);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
+  
 
   const fetchComplaints = async () => {
     const response = await api.get("api/complaints");

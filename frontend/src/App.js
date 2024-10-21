@@ -29,10 +29,7 @@ function App() {
         <Route
           path="complaintList"
           element={
-            <ProtectedRoute>
-              {" "}
-              <ComplaintList />
-            </ProtectedRoute>
+            <ProtectedRoute> <ComplaintList /> </ProtectedRoute>
           }
         />
       </Route>

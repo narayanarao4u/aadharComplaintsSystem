@@ -5,9 +5,11 @@ import { toast } from "react-toastify";
 import { LuSendHorizonal } from "react-icons/lu";
 import api from "../api";
 import ComplaintHisTable from "./ComplaintHisTable";
+import { compressImage } from "../context/utilities"
 
 const MAX_WIDTH = 1024;
 const MAX_HEIGHT = 800;
+const MAX_SIZE_KB = 100;
 
 const ComplaintForm = ({ onNewComplaint }) => {
   const [formData, setFormData] = useState({
@@ -18,6 +20,7 @@ const ComplaintForm = ({ onNewComplaint }) => {
     complaint: "",
   });
   const [image, setImage] = useState(null);
+  const [imageSize, setImageSize] = useState(null);
   const [stations, setStations] = useState([]);
   const [complaintHistory, setComplaintHistory] = useState([]);
 
@@ -59,34 +62,45 @@ const ComplaintForm = ({ onNewComplaint }) => {
     }
   }, [formData.stationId, stations, getComplaintsbyStationID]);
 
-  const compressImage = useCallback((imageFile) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        let { width, height } = img;
+  const handleCompressImage = useCallback(async (imageFile) => {
+    try {
+      const { image: compressedImage, size } = await compressImage(imageFile, MAX_WIDTH, MAX_HEIGHT, MAX_SIZE_KB);
+      setImage(compressedImage);
+      setImageSize(size);
+      
+      if (size > MAX_SIZE_KB) {
+        toast.warning(`Image size (${size.toFixed(2)}KB) exceeds ${MAX_SIZE_KB}KB limit. Please try a smaller image.`);
+      }
+    } catch (error) {
+      console.error("Error compressing image:", error);
+      toast.error("Failed to process the image. Please try again.");
+    }
+  }, []);
 
-        if (width > MAX_WIDTH || height > MAX_HEIGHT) {
-          if (width > height) {
-            height = Math.round((height *= MAX_WIDTH / width));
-            width = MAX_WIDTH;
-          } else {
-            width = Math.round((width *= MAX_HEIGHT / height));
-            height = MAX_HEIGHT;
-          }
+  const handlePaste = useCallback(
+    (event) => {
+      const items = event.clipboardData.items;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf("image") !== -1) {
+          handleCompressImage(items[i].getAsFile());
+          break;
         }
+      }
+    },
+    [handleCompressImage]
+  );
 
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-        const compressedImage = canvas.toDataURL("image/jpeg", 0.7);
-        setImage(compressedImage);
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(imageFile);
+  const handleFileUpload = useCallback(
+    (event) => {
+      const file = event.target.files[0];
+      if (file) handleCompressImage(file);
+    },
+    [handleCompressImage]
+  );
+
+  const handleChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   }, []);
 
   const handleSubmit = async (e) => {
@@ -109,31 +123,6 @@ const ComplaintForm = ({ onNewComplaint }) => {
     }
   };
 
-  const handlePaste = useCallback(
-    (event) => {
-      const items = event.clipboardData.items;
-      for (let i = 0; i < items.length; i++) {
-        if (items[i].type.indexOf("image") !== -1) {
-          compressImage(items[i].getAsFile());
-          break;
-        }
-      }
-    },
-    [compressImage]
-  );
-
-  const handleFileUpload = useCallback(
-    (event) => {
-      const file = event.target.files[0];
-      if (file) compressImage(file);
-    },
-    [compressImage]
-  );
-
-  const handleChange = useCallback((e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  }, []);
 
   const isSubmitDisabled = useMemo(() => !formData.stationName, [formData.stationName]);
 
@@ -179,26 +168,27 @@ const ComplaintForm = ({ onNewComplaint }) => {
           <textarea name="complaint" id="complaint" value={formData.complaint} onChange={handleChange} required rows={4} />
         </section>
 
-        <div>
+        <aside>
           <div className="file-input">
             <label htmlFor="imageUpload">Upload Error Image</label>
             <input id="imageUpload" type="file" accept="image/*" onChange={handleFileUpload} />
+            <small>Maximum image size: {MAX_SIZE_KB}KB</small>
           </div>
           <ImagePreview>
+           
             <p>Error image can be uploaded or Paste image here (Ctrl+V)</p>
+            <small>Maximum image size: {MAX_SIZE_KB}KB</small>
             {image && <img src={image} alt="pasted" />}
+  
           </ImagePreview>
-        </div>
-
-        <div>
           <button
             type="submit"
-            disabled={isSubmitDisabled}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+            disabled={isSubmitDisabled || (imageSize && imageSize > MAX_SIZE_KB)}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 "
           >
             Submit <LuSendHorizonal className="ml-2" />
           </button>
-        </div>
+        </aside>
       </Form>
 
       <hr />
@@ -216,7 +206,7 @@ const Form = styled.form`
   grid-template-columns: minmax(320px, 1fr) 1fr;
   gap: 10px;
   padding: 10px;
-  align-items: center;
+  
   justify-content: space-evenly;
 
   section {
@@ -224,6 +214,10 @@ const Form = styled.form`
     grid-template-columns: 180px 1fr;
     gap: 10px;
     margin-bottom: 10px;
+  }
+
+  aside {
+    align-items: start;
   }
 
   div.file-input {

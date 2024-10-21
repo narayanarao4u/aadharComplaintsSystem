@@ -45,31 +45,45 @@ export const cropImage = (imageFile) => {
   reader.readAsDataURL(imageFile);
 };
 
-export const compressImage = (imageFile, maxWidth = 1024, maxHeight = 800) => {
+export const compressImage = (imageFile, maxWidth = 1024, maxHeight = 800, maxSizeKB = 100) => {
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = new Image();
       img.onload = () => {
-        const canvas = document.createElement("canvas");
-        let { width, height } = img;
+        let quality = 0.7;
+        const compress = () => {
+          const canvas = document.createElement("canvas");
+          let { width, height } = img;
 
-        if (width > maxWidth || height > maxHeight) {
-          if (width > height) {
-            height = Math.round((height *= maxWidth / width));
-            width = maxWidth;
-          } else {
-            width = Math.round((width *= maxHeight / height));
-            height = maxHeight;
+          if (width > maxWidth || height > maxHeight) {
+            if (width > height) {
+              height = Math.round((height *= maxWidth / width));
+              width = maxWidth;
+            } else {
+              width = Math.round((width *= maxHeight / height));
+              height = maxHeight;
+            }
           }
-        }
 
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-        const compressedImage = canvas.toDataURL("image/jpeg", 0.7);
-        resolve(compressedImage);
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedImage = canvas.toDataURL("image/jpeg", quality);
+          
+          // Check if the size is less than maxSizeKB
+          const sizeKB = Math.round((compressedImage.length * 3) / 4) / 1024;
+          
+          if (sizeKB > maxSizeKB && quality > 0.1) {
+            quality -= 0.1;
+            compress();
+          } else {
+            resolve({ image: compressedImage, size: sizeKB });
+          }
+        };
+
+        compress();
       };
       img.src = e.target.result;
     };
