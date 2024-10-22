@@ -6,6 +6,9 @@ import Login from "../components/Login";
 const ProtectedRoute = ({ children }) => {
   const { state } = useContext(AuthContext);
 
+  console.log(children);
+  
+
   return state.isAuthenticated ? children : <Login />;
 };
 

@@ -6,7 +6,7 @@ import { ComplaintListContext } from "./ComplaintList";
 import { StatusElement } from "./StatusElement";
 import ImageModal from "./ImageModal";
 
-const DisplayList = () => {
+const DisplayList = ({showEditButton = false}) => {
   const { complaints, selectComplaint } = React.useContext(ComplaintListContext);
   const [selectedImage, setSelectedImage] = useState(null);
 
@@ -64,9 +64,11 @@ const DisplayList = () => {
                 <StatusElement status={complaint.status} />
               </td>
               <td>
-                <button onClick={() => selectComplaint(complaint)}>
-                  <GrEdit />
-                </button>
+                {showEditButton && (
+                  <button onClick={() => selectComplaint(complaint)}>
+                    <GrEdit />
+                  </button>
+                )}
               </td>
             </tr>
           ))}

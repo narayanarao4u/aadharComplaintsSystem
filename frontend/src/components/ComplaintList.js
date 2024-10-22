@@ -5,9 +5,12 @@ import DisplayList from "./DisplayList";
 
 export const ComplaintListContext = React.createContext();
 
-const ComplaintList = () => {
+const ComplaintList = ({role}) => {
+  
   const [complaints, setComplaints] = useState([]);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
+
+
   
 
   const fetchComplaints = async () => {
@@ -43,7 +46,7 @@ const ComplaintList = () => {
             }}
           />
         ) : (
-          <DisplayList />
+          <DisplayList showEditButton={role === "admin"} />
         )}
       </div>
     </ComplaintListContext.Provider>

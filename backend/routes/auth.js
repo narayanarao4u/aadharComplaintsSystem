@@ -12,19 +12,22 @@ const generateToken = (id) => {
 // @route POST /auth/signup
 // @desc Register a new user
 router.post("/signup", async (req, res) => {
-  const { username, password } = req.body;
+  const data = req.body;
 
   try {
-    let user = await User.findOne({ username });
+    let user = await User.findOne({ username: data.username });
     if (user) {
       return res.status(400).json({ msg: "User already exists" });
     }
 
-    user = new User({ username, password });
+    user = new User(data);
     await user.save();
 
     const token = generateToken(user._id);
-    res.json({ token, user: { id: user._id, username: user.username } });
+    delete user.password;
+    delete user.confirmPassword;
+
+    res.json({ token, user });
   } catch (err) {
     console.error(err);
     res.status(500).send("Server Error");
@@ -38,6 +41,8 @@ router.post("/login", async (req, res) => {
 
   try {
     const user = await User.findOne({ username });
+    console.log(user);
+    
     if (!user) {
       return res.status(400).json({ msg: "User does not exist" });
     }
@@ -48,7 +53,11 @@ router.post("/login", async (req, res) => {
     }
 
     const token = generateToken(user._id);
-    res.json({ token, user: { id: user._id, username: user.username } });
+    delete user.password;
+  
+    
+    // res.json({ token, user: { id: user._id, username: user.username, stationId:user.stationId, stationName:user.stationName } });
+    res.json({ token, user });
   } catch (err) {
     console.error(err);
     res.status(500).send("Server Error");

@@ -3,7 +3,14 @@ const bcrypt = require("bcryptjs");
 
 const UserSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  password: { type: String, required: true },  
+  role: { type: String, required: true, default: "AEK" },
+  stationId : { type: String },
+  stationName : { type: String },
+},
+{
+  timestamps: true,
+  strict: false,
 });
 
 // Hash the password before saving

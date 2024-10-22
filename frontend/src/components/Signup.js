@@ -1,31 +1,66 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect, useCallback } from "react";
 import AuthContext from "../context/AuthContext";
-import { baseURL } from "../api";
-import {  toast } from "react-toastify";
+import api, { baseURL } from "../api";
+import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+    confirmPassword: "",
+    stationName: "",
+    role: "AEK",
+  });
+  const [stations, setStations] = useState([]);
   const { dispatch } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  const fetchStations = useCallback(async () => {
+    try {
+      const response = await api.get("/api/complaints/stationData");
+      setStations(response.data);
+    } catch (err) {
+      console.error("Error fetching stations:", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchStations();
+  }, [fetchStations]);
+
+  useEffect(() => {
+    const station = stations.find((s) => s.StationId === +formData.username);
+    setFormData((prev) => ({ ...prev, stationName: station ? station.AEK_LOCATION : "" }));
+  }, [formData.username, stations]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const { username, password, confirmPassword, stationName } = formData;
+    
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    console.log({ username, password, stationId: username, stationName });
+    
+    
+   
+
     try {
       const res = await fetch(`${baseURL}auth/signup`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password, stationId: username, stationName }),
       });
 
       if (!res.ok) {
-        console.log(res.status);
-        toast.error("Failed to sign up");
-        throw new Error();
+        toast.error('Bad Request or user already exists');
+        throw new Error("Failed to sign up");
       }
+
       const data = await res.json();
       dispatch({ type: "LOGIN", payload: data });
       navigate("/login");
@@ -34,53 +69,68 @@ const Signup = () => {
     }
   };
 
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
   return (
-    <div className=" flex  justify-center  py-12 px-4 sm:px-6 lg:px-8">
+    <div className="flex justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Create account</h2>
-        </div>
+        <h2 className="text-center text-3xl font-extrabold text-gray-900">Create account</h2>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <input type="hidden" name="remember" defaultValue="true" />
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="username">Username</label>
-              <input
-                id="username"
-                name="username"
-                type="text"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-            </div>
-            <div>
-              <label htmlFor="password">Password</label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
+          <div className="rounded-md shadow-sm">
+            <label htmlFor="username">Username (AEK Station ID)</label>
+            <input
+              id="username"
+              name="username"
+              type="text"
+              required
+              className="block w-full px-3 py-2 border rounded-t-md"
+              placeholder="Username"
+              value={formData.username}
+              onChange={handleChange}
+            />
+            <input
+              id="stationName"
+              name="stationName"
+              type="text"
+              className="block w-full px-3 py-2 border"
+              placeholder="Station Name"
+              value={formData.stationName}
+              readOnly
+            />
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              required
+              className="block w-full px-3 py-2 border"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+            />
+            <label htmlFor="confirmPassword">Confirm Password</label>
+            <input
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
+              required
+              className="block w-full px-3 py-2 border rounded-b-md"
+              placeholder="Confirm Password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+            />
           </div>
+          <button
+            type="submit"
+            className="w-full py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+          >
+            Sign Up
+          </button>
 
-          <div>
-            <button
-              type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Sign in
-            </button>
-          </div>
+      
         </form>
-
       </div>
     </div>
   );

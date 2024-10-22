@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import AuthContext from "../context/AuthContext";
 import { baseURL } from "../api";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -27,7 +27,6 @@ const Login = () => {
       } else {
         toast.success("Logged in successfully!");
         dispatch({ type: "LOGIN", payload: data });
-        console.log(data);
         navigate("/");
       }
     } catch (error) {
@@ -80,6 +79,10 @@ const Login = () => {
               Sign in
             </button>
           </div>
+          <div className="flex items-center justify-between">
+          <Link to="/signup" className="text-center text-indigo-600 hover:text-indigo-700 border-b-2 border-indigo-500">Sign Up</Link>
+          </div>
+
         </form>
 
       </div>

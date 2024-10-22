@@ -16,29 +16,37 @@ import ProtectedRoute from "./context/ProtectedRoute";
 import HomePage from "./components/HomePage";
 import Feedback from "./components/Feedback";
 import { GoHomeFill } from "react-icons/go";
+import { NotFound } from "./components/NotFound";
 
 function App() {
+  const { state, dispatch } = useContext(AuthContext);
   return (
     <Routes>
-      <Route path="/" element={<Layout />}>
+      <Route path="/" element={<Layout state={state} dispatch={dispatch} />}>
         <Route index element={<HomePage />} />
         <Route path="signup" element={<Signup />} />
         <Route path="login" element={<Login />} />
-        <Route path="complaints" element={<ComplaintForm />} />
-        <Route path="feedback/:id" element={<Feedback />} />
+      
+          <Route path="complaints" element={ < ProtectedRoute> <ComplaintForm />  </ProtectedRoute>} />
+       
+        
+        <Route path="feedback/:id" element={ < ProtectedRoute> <Feedback /> </ProtectedRoute>} />
+        { ['admin', 'agm'].includes(state?.user?.role)   && (
         <Route
           path="complaintList"
-          element={
-            <ProtectedRoute> <ComplaintList /> </ProtectedRoute>
-          }
+          element={<ProtectedRoute> <ComplaintList role = {state?.user?.role} /> </ProtectedRoute>}
         />
+      ) }
+
+      <Route path="*" element={<NotFound />} />
+      
       </Route>
     </Routes>
   );
 }
 
-function Layout() {
-  const { state, dispatch } = useContext(AuthContext);
+function Layout({ state, dispatch } ) {
+  
   const navigate = useNavigate();
 
   const handleLogout = () => {

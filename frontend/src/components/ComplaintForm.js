@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useCallback, useMemo, useContext } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -6,19 +6,26 @@ import { LuSendHorizonal } from "react-icons/lu";
 import api from "../api";
 import ComplaintHisTable from "./ComplaintHisTable";
 import { compressImage } from "../context/utilities"
+import AuthContext from "../context/AuthContext";
 
 const MAX_WIDTH = 1024;
 const MAX_HEIGHT = 800;
 const MAX_SIZE_KB = 100;
 
 const ComplaintForm = ({ onNewComplaint }) => {
+  const {state} = useContext(AuthContext);
+  const { user } = state;
+
+  
   const [formData, setFormData] = useState({
-    stationId: "",
-    stationName: "",
+    stationId: user?.stationId || "", // Use optional chaining to avoid errors
+    stationName: user?.stationName || "", // Handle undefined or null user properties
     Operatorname: "",
     phone: "",
     complaint: "",
   });
+
+ 
   const [image, setImage] = useState(null);
   const [imageSize, setImageSize] = useState(null);
   const [stations, setStations] = useState([]);
@@ -125,6 +132,7 @@ const ComplaintForm = ({ onNewComplaint }) => {
 
 
   const isSubmitDisabled = useMemo(() => !formData.stationName, [formData.stationName]);
+ 
 
   return (
     <>
@@ -138,8 +146,9 @@ const ComplaintForm = ({ onNewComplaint }) => {
             placeholder="Enter station ID"
             maxLength={5}
             minLength={5}
-            required
+            readOnly = {user.role !== "admin"}
           />
+          
           <CustomInput
             disp="Station Name"
             name="stationName"
